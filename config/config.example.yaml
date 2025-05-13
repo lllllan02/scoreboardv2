@@ -1,0 +1,6 @@
+server:
+  port: 8080
+  mode: "debug"  # 可选: debug, release, test
+
+data:
+  path: "data"   # JSON 文件存储路径 
