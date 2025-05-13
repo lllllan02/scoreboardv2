@@ -20,10 +20,13 @@ var (
 
 func main() {
 	fmt.Println("开始爬取比赛列表...")
-	fetchContestList()
+	contestList := fetchContestList()
+
+	// 下载比赛 LOGO
+	helper.DownloadLogo(contestList)
 }
 
-func fetchContestList() {
+func fetchContestList() model.ContestList {
 	url := "https://board.xcpcio.com/data/index/contest_list.json"
 
 	// 获取数据
@@ -45,8 +48,6 @@ func fetchContestList() {
 		log.Fatal(err)
 	}
 
-	helper.DownloadImage(contestList)
-
 	// 格式化JSON为美观缩进格式
 	prettyJSON, err := json.MarshalIndent(contestList, "", "  ")
 	if err != nil {
@@ -64,4 +65,6 @@ func fetchContestList() {
 	}
 
 	log.Printf("成功保存比赛列表到 %s", filePath)
+
+	return contestList
 }

@@ -24,7 +24,7 @@ var (
 	icpcLogo []byte
 )
 
-func DownloadImage(contestList model.ContestList) {
+func DownloadLogo(contestList model.ContestList) {
 	path := config.GetConfig().Data.Path
 
 	// 计算总任务数量
