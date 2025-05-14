@@ -2,6 +2,7 @@ package api
 
 import (
 	"github.com/gin-gonic/gin"
+	"github.com/lllllan02/scoreboardv2/api/handler"
 	"github.com/lllllan02/scoreboardv2/config"
 	"github.com/lllllan02/scoreboardv2/internal/middleware"
 )
@@ -27,6 +28,10 @@ func SetupRouter() *gin.Engine {
 
 	// 健康检查
 	r.GET("/ping", func(c *gin.Context) { c.JSON(200, gin.H{"message": "pong"}) })
+
+	// API 路由
+	// 获取比赛列表
+	r.GET("/api/contest_list", handler.GetContestList)
 
 	return r
 }

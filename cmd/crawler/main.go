@@ -18,7 +18,7 @@ func main() {
 	fmt.Println("开始爬取比赛列表...")
 	contestList := fetchContestList()
 
-	fetchContests(helper.Walk(contestList))
+	fetchContests(contestList.Walk())
 }
 
 func fetchContestList() model.ContestList {

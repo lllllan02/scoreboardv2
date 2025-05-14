@@ -37,7 +37,7 @@ func DownloadLogo(contestList model.ContestList) {
 	logobar = NewProgressBar(totalTasks, "下载比赛 LOGO")
 
 	// 处理各种不同类型的比赛
-	for _, contest := range Walk(contestList) {
+	for _, contest := range contestList.Walk() {
 		FetchLogo(contest)
 	}
 
