@@ -7,6 +7,8 @@ import (
 	"github.com/lllllan02/scoreboardv2/cmd/crawler/helper"
 	"github.com/lllllan02/scoreboardv2/config"
 	"github.com/lllllan02/scoreboardv2/internal/model"
+	"github.com/lllllan02/scoreboardv2/pkg/files"
+	"github.com/lllllan02/scoreboardv2/pkg/remote"
 )
 
 var (
@@ -26,7 +28,7 @@ func fetchContestList() model.ContestList {
 
 	// 解析JSON为通用数据结构
 	var contestList model.ContestList
-	if err := helper.Fetch(url, &contestList); err != nil {
+	if err := remote.Fetch(url, &contestList); err != nil {
 		panic(err)
 	}
 
@@ -38,7 +40,7 @@ func fetchContestList() model.ContestList {
 
 	// 保存比赛列表
 	filePath := filepath.Join(path, "contest_list.json")
-	helper.Save(filePath, contestList)
+	files.Save(filePath, contestList)
 
 	fmt.Printf("成功保存比赛列表到 %s\n", filePath)
 
@@ -74,7 +76,7 @@ func fetchConfig(link string) {
 		BoardLink: link,
 		Config:    model.ContestConfig{},
 	}
-	if err := helper.Fetch(url, &contest.Config); err != nil {
+	if err := remote.Fetch(url, &contest.Config); err != nil {
 		fmt.Printf("\033[2K\r获取 %s config 失败: %s\n", link, err)
 		return
 	}
@@ -83,7 +85,7 @@ func fetchConfig(link string) {
 	helper.FetchLogo(&contest)
 
 	// 保存比赛配置
-	helper.Save(filePath, contest.Config)
+	files.Save(filePath, contest.Config)
 }
 
 func fetchTeam(link string) {
@@ -91,13 +93,13 @@ func fetchTeam(link string) {
 	filePath := filepath.Join(path, link, "team.json")
 
 	team := model.TeamList{}
-	if err := helper.Fetch(url, &team); err != nil {
+	if err := remote.Fetch(url, &team); err != nil {
 		fmt.Printf("\033[2K\r获取 %s team 失败: %s\n", link, err)
 		return
 	}
 
 	// 保存队伍列表
-	helper.Save(filePath, team)
+	files.Save(filePath, team)
 }
 
 func fetchRun(link string) {
@@ -105,11 +107,11 @@ func fetchRun(link string) {
 	filePath := filepath.Join(path, link, "run.json")
 
 	run := model.RunList{}
-	if err := helper.Fetch(url, &run); err != nil {
+	if err := remote.Fetch(url, &run); err != nil {
 		fmt.Printf("\033[2K\r获取 %s run 失败: %s\n", link, err)
 		return
 	}
 
 	// 保存运行列表
-	helper.Save(filePath, run)
+	files.Save(filePath, run)
 }
