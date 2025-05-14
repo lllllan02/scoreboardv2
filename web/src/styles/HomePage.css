@@ -1,0 +1,38 @@
+.home-container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 20px;
+}
+
+.header-container {
+  display: flex;
+  align-items: center;
+  margin-bottom: 24px;
+}
+
+.header-icon {
+  font-size: 32px;
+  margin-right: 12px;
+  color: #1890ff;
+}
+
+.header-title {
+  margin: 0;
+}
+
+.search-container {
+  margin-bottom: 24px;
+}
+
+.error-message {
+  margin-bottom: 16px;
+}
+
+.loading-container {
+  text-align: center;
+  padding: 40px;
+}
+
+.empty-container {
+  padding: 40px;
+} 
