@@ -8,7 +8,7 @@ type ContestConfig struct {
 	FrozenTime        int               `json:"frozen_time,omitempty"`
 	Penalty           int               `json:"penalty,omitempty"`
 	ProblemQuantity   int               `json:"problem_quantity,omitempty"`
-	ProblemID         []string          `json:"problem_id,omitempty"`
+	ProblemId         []string          `json:"problem_id,omitempty"`
 	Group             map[string]string `json:"group,omitempty"`
 	Organization      string            `json:"organization,omitempty"`
 	StatusTimeDisplay StatusTimeDisplay `json:"status_time_display,omitempty"`

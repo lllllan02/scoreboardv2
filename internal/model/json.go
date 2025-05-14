@@ -2,6 +2,7 @@ package model
 
 import (
 	"encoding/json"
+	"fmt"
 
 	"github.com/spf13/cast"
 )
@@ -21,6 +22,25 @@ func (fb *FlexBool) UnmarshalJSON(data []byte) error {
 		return err
 	}
 	*fb = FlexBool(boolValue)
+	return nil
+}
+
+type FlexString string
+
+func (m *FlexString) UnmarshalJSON(data []byte) error {
+	if len(data) == 0 {
+		return nil
+	}
+
+	var strValue string
+	if err := json.Unmarshal(data, &strValue); err == nil {
+		*m = FlexString(strValue)
+	}
+
+	if intValue, err := cast.ToIntE(string(data)); err == nil {
+		*m = FlexString(fmt.Sprint(intValue))
+	}
+
 	return nil
 }
 

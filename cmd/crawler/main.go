@@ -53,7 +53,14 @@ func fetchContests(contest []*model.Contest) {
 	for _, contest := range contest {
 		contestBar.SetCurrentObject(contest.BoardLink)
 
+		// 爬取比赛配置
 		fetchConfig(contest.BoardLink)
+
+		// 爬取队伍列表
+		fetchTeam(contest.BoardLink)
+
+		// 爬取运行列表
+		fetchRun(contest.BoardLink)
 
 		contestBar.Add(1)
 	}
@@ -77,4 +84,32 @@ func fetchConfig(link string) {
 
 	// 保存比赛配置
 	helper.Save(filePath, contest.Config)
+}
+
+func fetchTeam(link string) {
+	url := fmt.Sprintf("https://board.xcpcio.com/data%s/team.json", link)
+	filePath := filepath.Join(path, link, "team.json")
+
+	team := model.TeamList{}
+	if err := helper.Fetch(url, &team); err != nil {
+		fmt.Printf("\033[2K\r获取 %s team 失败: %s\n", link, err)
+		return
+	}
+
+	// 保存队伍列表
+	helper.Save(filePath, team)
+}
+
+func fetchRun(link string) {
+	url := fmt.Sprintf("https://board.xcpcio.com/data%s/run.json", link)
+	filePath := filepath.Join(path, link, "run.json")
+
+	run := model.RunList{}
+	if err := helper.Fetch(url, &run); err != nil {
+		fmt.Printf("\033[2K\r获取 %s run 失败: %s\n", link, err)
+		return
+	}
+
+	// 保存运行列表
+	helper.Save(filePath, run)
 }
