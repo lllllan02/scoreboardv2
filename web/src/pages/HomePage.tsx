@@ -76,7 +76,7 @@ const HomePage: React.FC = () => {
       ) : contests && contests.length > 0 ? (
         <Row gutter={[16, 16]}>
           {contests.map(contest => (
-            <Col xs={24} sm={12} md={8} key={contest.config.contestId}>
+            <Col xs={24} sm={24} md={24} key={contest.config.contest_id}>
               <ContestCard contest={contest} />
             </Col>
           ))}
