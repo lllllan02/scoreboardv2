@@ -9,7 +9,6 @@ import (
 	"os"
 	"path/filepath"
 	"strings"
-	"time"
 
 	"github.com/lllllan02/scoreboardv2/config"
 	"github.com/lllllan02/scoreboardv2/internal/model"
@@ -39,7 +38,7 @@ func DownloadLogo(contestList model.ContestList) {
 
 	// 处理各种不同类型的比赛
 	for _, contest := range Walk(contestList) {
-		fetchLogo(contest)
+		FetchLogo(contest)
 	}
 
 	// 完成进度条
@@ -72,7 +71,7 @@ func countTasks(contestList model.ContestList) int {
 	return count
 }
 
-func fetchLogo(contest *model.Contest) {
+func FetchLogo(contest *model.Contest) {
 	// 设置当前处理的对象名称，用于进度条显示
 	logobar.SetCurrentObject(contest.BoardLink)
 
@@ -154,8 +153,6 @@ func saveImage(path string, imageData []byte) error {
 		fmt.Printf("写入文件 %s 失败: %v", path, err)
 		return err
 	}
-
-	time.Sleep(time.Millisecond * 10) // 短暂延迟，防止 IO 过载
 
 	return nil
 }
