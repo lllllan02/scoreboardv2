@@ -15,16 +15,8 @@ import (
 // 数据目录路径
 var dataPath = config.GetConfig().Data.Path
 
-// ContestService 处理比赛相关的业务逻辑
-type ContestService struct{}
-
-// NewContestService 创建比赛服务实例
-func NewContestService() *ContestService {
-	return &ContestService{}
-}
-
 // GetContestList 获取比赛列表数据
-func (s *ContestService) GetContestList(contestName string) ([]*model.Contest, error) {
+func GetContestList(contestName string) ([]*model.Contest, error) {
 	// 构建contest_list.json的完整路径
 	filePath := filepath.Join(dataPath, "contest_list.json")
 
@@ -45,6 +37,7 @@ func (s *ContestService) GetContestList(contestName string) ([]*model.Contest, e
 		return nil, errors.NewInternalError("解析比赛列表数据失败", err)
 	}
 
+	// 遍历比赛列表
 	contests := contestList.Walk()
 
 	// 如果 contestName 不为空，则过滤比赛列表
