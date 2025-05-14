@@ -1,5 +1,4 @@
 import React from "react";
-import { Card } from "antd";
 import {
   ClockCircleOutlined,
   CalendarOutlined,
@@ -10,7 +9,7 @@ import {
 } from "@ant-design/icons";
 import { Contest } from "../types/contest";
 import { Link } from "react-router-dom";
-import "./ContestCard.css";
+import "../styles/ContestCard.css";
 
 interface ContestCardProps {
   contest: Contest;
@@ -106,54 +105,54 @@ const ContestCard: React.FC<ContestCardProps> = ({ contest }) => {
   
   return (
     <Link to={`/${contest.board_link}`} className="contest-link">
-      <Card
-        hoverable
-        title={
-          <div className="contest-card-title">
-            {logoPath && !logoError && (
-              <img 
-                src={logoPath}
-                alt="Contest Logo" 
-                className="contest-logo"
-                onError={() => setLogoError(true)}
-              />
-            )}
-            {contest.config.contest_name}
-          </div>
-        }
-        className="contest-card"
-      >
-        <div className="contest-card-content">
-          <p className="contest-card-time-item">
-            <CalendarOutlined className="contest-card-time-icon" />
-            开始时间: {formatTime(contest.config.start_time || 0)}
-            <span className="contest-timezone">GMT+8</span>
-          </p>
-          <p className="contest-card-time-item">
-            <ClockCircleOutlined className="contest-card-time-icon" />
-            持续时长:{" "}
-            {getDuration(
-              contest.config.start_time || 0,
-              contest.config.end_time || 0
-            )}
-          </p>
-        </div>
-
-        <div className="contest-status">
-          <span className={`status-text ${status.className}`}>
-            {status.icon} <span style={{ marginLeft: 4 }}>{status.text}</span>
-          </span>
-
-          <div className="contest-progress">
-            <div
-              className="contest-progress-inner"
-              style={{ width: `${progress}%` }}
+      <div className="contest-card-new">
+        <div className="contest-header">
+          {logoPath && !logoError && (
+            <img 
+              src={logoPath}
+              alt="Contest Logo" 
+              className="contest-logo"
+              onError={() => setLogoError(true)}
             />
+          )}
+          <h3 className="contest-title">{contest.config.contest_name}</h3>
+        </div>
+        
+        <div className="contest-main">
+          <div className="contest-time-info">
+            <div className="time-item">
+              <CalendarOutlined className="time-icon" />
+              <span>开始时间: {formatTime(contest.config.start_time || 0)}</span>
+              <span className="timezone">GMT+8</span>
+            </div>
+            <div className="time-item">
+              <ClockCircleOutlined className="time-icon" />
+              <span>持续时长: {getDuration(
+                contest.config.start_time || 0,
+                contest.config.end_time || 0
+              )}</span>
+            </div>
           </div>
 
-          <RightOutlined className="contest-arrow" />
+          <div className="contest-status-container">
+            <div className="progress-container">
+              <span className={`status-tag ${status.className}`}>
+                {status.icon} <span>{status.text}</span>
+              </span>
+              <div className="progress-bar-container">
+                <div className="progress-bar">
+                  <div
+                    className="progress-inner"
+                    style={{ width: `${progress}%` }}
+                  ></div>
+                  <div className="progress-percent">{progress}%</div>
+                </div>
+                <RightOutlined className="arrow-icon" />
+              </div>
+            </div>
+          </div>
         </div>
-      </Card>
+      </div>
     </Link>
   );
 };
