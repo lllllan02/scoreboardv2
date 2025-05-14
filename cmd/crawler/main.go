@@ -64,7 +64,7 @@ func fetchContestList() model.ContestList {
 		log.Fatal(err)
 	}
 
-	log.Printf("成功保存比赛列表到 %s", filePath)
+	fmt.Printf("成功保存比赛列表到 %s\n", filePath)
 
 	return contestList
 }

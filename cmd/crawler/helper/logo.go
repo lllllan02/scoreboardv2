@@ -18,12 +18,15 @@ import (
 
 var (
 	//go:embed ccpc.png
-	ccpcLogo []byte
+	ccpcLogo []byte // 嵌入 CCPC 比赛的默认 logo
 
 	//go:embed icpc.png
-	icpcLogo []byte
+	icpcLogo []byte // 嵌入 ICPC 比赛的默认 logo
+
+	logobar *ProgressBar // 下载 logo 时显示的进度条
 )
 
+// DownloadLogo 下载所有比赛的logo文件
 func DownloadLogo(contestList model.ContestList) {
 	path := config.GetConfig().Data.Path
 
@@ -31,46 +34,46 @@ func DownloadLogo(contestList model.ContestList) {
 	totalTasks := countTasks(contestList)
 
 	// 创建进度条
-	progressBar := NewProgressBar(totalTasks, "下载比赛 LOGO")
+	logobar = NewProgressBar(totalTasks, "下载比赛 LOGO")
 
-	campPath := filepath.Join(path, "camp")
-	walkOrg(campPath, contestList.Camp, progressBar)
+	// 处理各种不同类型的比赛
+	{
+		campPath := filepath.Join(path, "camp")
+		walkOrg(campPath, contestList.Camp)
 
-	provincialContestPath := filepath.Join(path, "provincial-contest")
-	walkYear(provincialContestPath, contestList.ProvincialContest, progressBar)
+		provincialContestPath := filepath.Join(path, "provincial-contest")
+		walkYear(provincialContestPath, contestList.ProvincialContest)
 
-	ccpcPath := filepath.Join(path, "ccpc")
-	walkYear(ccpcPath, contestList.CCPC, progressBar)
+		ccpcPath := filepath.Join(path, "ccpc")
+		walkYear(ccpcPath, contestList.CCPC)
 
-	icpcPath := filepath.Join(path, "icpc")
-	walkYear(icpcPath, contestList.ICPC, progressBar)
+		icpcPath := filepath.Join(path, "icpc")
+		walkYear(icpcPath, contestList.ICPC)
+	}
 
 	// 完成进度条
-	progressBar.Complete()
+	logobar.Finish()
 }
 
-// 计算总任务数量
+// countTasks 计算需要处理的logo总数
 func countTasks(contestList model.ContestList) int {
 	count := 0
 
-	// 计算 Camp 中的任务数量
+	// 计算各类比赛的logo数量并累加
 	for _, yearGroup := range contestList.Camp {
 		for _, contestGroup := range yearGroup {
 			count += len(contestGroup)
 		}
 	}
 
-	// 计算 ProvincialContest 中的任务数量
 	for _, contestGroup := range contestList.ProvincialContest {
 		count += len(contestGroup)
 	}
 
-	// 计算 CCPC 中的任务数量
 	for _, contestGroup := range contestList.CCPC {
 		count += len(contestGroup)
 	}
 
-	// 计算 ICPC 中的任务数量
 	for _, contestGroup := range contestList.ICPC {
 		count += len(contestGroup)
 	}
@@ -78,60 +81,66 @@ func countTasks(contestList model.ContestList) int {
 	return count
 }
 
-func walkOrg(path string, org model.OrganizationGroup, progressBar *ProgressBar) {
+// walkOrg 遍历组织结构，处理每个组织下的比赛
+func walkOrg(path string, org model.OrganizationGroup) {
 	for org, yearGroup := range org {
 		path := filepath.Join(path, org)
-		walkYear(path, yearGroup, progressBar)
+		walkYear(path, yearGroup)
 	}
 }
 
-func walkYear(path string, year model.YearGroup, progressBar *ProgressBar) {
+// walkYear 遍历年份，处理每年的比赛
+func walkYear(path string, year model.YearGroup) {
 	for year, contestGroup := range year {
 		path := filepath.Join(path, year)
-		walkGroup(path, contestGroup, progressBar)
+		walkGroup(path, contestGroup)
 	}
 }
 
-func walkGroup(path string, group model.ContestGroup, progressBar *ProgressBar) {
+// walkGroup 遍历比赛组，下载和保存每个比赛的 logo
+func walkGroup(path string, group model.ContestGroup) {
 	for name, contest := range group {
-		// 设置当前处理的对象名称
-		progressBar.SetCurrentObject(path)
+		// 设置当前处理的对象名称，用于进度条显示
+		logobar.SetCurrentObject(path)
 
 		path := filepath.Join(path, name, "logo.png")
 		contest.Config.Logo.Path = path
 
-		// 如果图片是 base64，则保存到本地
+		// 处理 Base64 编码的 logo
 		if contest.Config.Logo.Base64 != "" {
 			saveBase64Image(path, contest.Config.Logo.Base64)
 		}
 
+		// 根据预设类型选择 logo
 		switch present := strings.ToLower(contest.Config.Logo.Preset); present {
 		case "":
-			saveImage(path, ccpcLogo)
+			// 不做任何处理
 		case "ccpc":
-			saveImage(path, ccpcLogo)
+			saveImage(path, ccpcLogo) // 使用 CCPC logo
 		case "icpc":
-			saveImage(path, icpcLogo)
-
+			saveImage(path, icpcLogo) // 使用 ICPC logo
 		default:
+			// 从远程 URL 获取 logo
 			url := fmt.Sprintf("https://board.xcpcio.com/logos/%s.png", present)
 			fetchImage(url, path)
 		}
 
+		// 清除已处理的logo配置
 		contest.Config.Logo.Preset = ""
 		contest.Config.Logo.Base64 = ""
 
-		progressBar.Add(1)
+		logobar.Add(1) // 更新进度条
 	}
 }
 
+// saveBase64Image 将Base64编码的图片保存到文件
 func saveBase64Image(path, base64Str string) error {
-	// 移除 base64 编码前缀 (如 "data:image/png;base64,")
+	// 移除Base64编码前缀（如 "data:image/png;base64,"）
 	if i := strings.Index(base64Str, ","); i > 0 {
 		base64Str = base64Str[i+1:]
 	}
 
-	// 解码 base64 字符串
+	// 解码Base64字符串
 	imageData, err := base64.StdEncoding.DecodeString(base64Str)
 	if err != nil {
 		log.Printf("base64 解码失败: %v", err)
@@ -141,6 +150,7 @@ func saveBase64Image(path, base64Str string) error {
 	return saveImage(path, imageData)
 }
 
+// fetchImage 从URL获取图片并保存
 func fetchImage(url, path string) error {
 	resp, err := http.Get(url)
 	if err != nil {
@@ -158,6 +168,7 @@ func fetchImage(url, path string) error {
 	return saveImage(path, imageData)
 }
 
+// saveImage 将图片数据保存到指定路径
 func saveImage(path string, imageData []byte) error {
 	// 确保目录存在
 	dir := filepath.Dir(path)
@@ -172,7 +183,7 @@ func saveImage(path string, imageData []byte) error {
 		return err
 	}
 
-	time.Sleep(time.Millisecond * 10)
+	time.Sleep(time.Millisecond * 10) // 短暂延迟，防止 IO 过载
 
 	return nil
 }

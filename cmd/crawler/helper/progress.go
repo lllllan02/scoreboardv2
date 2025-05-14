@@ -21,17 +21,21 @@ type ProgressBar struct {
 // NewProgressBar 创建一个新的进度条
 func NewProgressBar(total int, description string) *ProgressBar {
 	// 创建进度条管理器
-	pb := &ProgressBar{
-		taskDescription: description,
-	}
+	pb := &ProgressBar{taskDescription: description}
 
 	// 创建新的进度条
 	pb.bar = progressbar.NewOptions64(
+		// 设置总任务数
 		int64(total),
+		// 启用颜色代码
 		progressbar.OptionEnableColorCodes(true),
+		// 不显示字节数
 		progressbar.OptionShowBytes(false),
+		// 设置宽度
 		progressbar.OptionSetWidth(50),
+		// 设置描述
 		progressbar.OptionSetDescription(description),
+		// 设置主题
 		progressbar.OptionSetTheme(progressbar.Theme{
 			Saucer:        "[green]=[reset]",
 			SaucerHead:    "[green]>[reset]",
@@ -39,10 +43,10 @@ func NewProgressBar(total int, description string) *ProgressBar {
 			BarStart:      "[",
 			BarEnd:        "]",
 		}),
-		progressbar.OptionOnCompletion(func() {
-			fmt.Print("\n")
-		}),
+		progressbar.OptionOnCompletion(func() { fmt.Print("\n") }),
+		// 设置自定义写入器来显示对象名称
 		progressbar.OptionSetWriter(newCustomWriter(os.Stdout, pb)),
+		// 显示计数
 		progressbar.OptionShowCount(),
 	)
 
@@ -75,6 +79,7 @@ func (cw *customWriter) Write(p []byte) (n int, err error) {
 // SetCurrentObject 设置当前处理的对象名称
 func (pb *ProgressBar) SetCurrentObject(name string) {
 	pb.currentObject = name
+
 	// 强制刷新进度条，但不添加进度
 	if pb.bar != nil {
 		pb.bar.RenderBlank()
@@ -88,14 +93,16 @@ func (pb *ProgressBar) Add(n int) {
 	}
 }
 
-// Complete 完成进度条
-func (pb *ProgressBar) Complete() {
+// Finish 完成进度条
+func (pb *ProgressBar) Finish() {
 	// 确保进度条显示100%完成
 	if pb.bar != nil {
 		pb.bar.Finish()
 	}
+
 	// 清除当前对象名称，使进度条显示更干净
 	pb.currentObject = ""
+
 	// 如果需要，可以再次渲染以确保显示最终状态
 	if pb.bar != nil {
 		pb.bar.RenderBlank()
