@@ -33,6 +33,18 @@
   padding: 40px;
 }
 
+.loading-more-container {
+  text-align: center;
+  padding: 20px 0;
+  margin-top: 12px;
+}
+
 .empty-container {
   padding: 40px;
+}
+
+.end-message {
+  text-align: center;
+  color: #999;
+  padding: 16px;
 } 
