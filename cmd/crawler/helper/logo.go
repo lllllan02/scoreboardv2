@@ -5,7 +5,6 @@ import (
 	"encoding/base64"
 	"fmt"
 	"io"
-	"log"
 	"net/http"
 	"os"
 	"path/filepath"
@@ -116,7 +115,7 @@ func saveBase64Image(path, base64Str string) error {
 	// 解码Base64字符串
 	imageData, err := base64.StdEncoding.DecodeString(base64Str)
 	if err != nil {
-		log.Printf("base64 解码失败: %v", err)
+		fmt.Printf("base64 解码失败: %v", err)
 		return err
 	}
 
@@ -127,14 +126,14 @@ func saveBase64Image(path, base64Str string) error {
 func fetchImage(url, path string) error {
 	resp, err := http.Get(url)
 	if err != nil {
-		log.Printf("获取图片失败: %v", err)
+		fmt.Printf("获取图片失败: %v", err)
 		return err
 	}
 	defer resp.Body.Close()
 
 	imageData, err := io.ReadAll(resp.Body)
 	if err != nil {
-		log.Printf("读取图片失败: %v", err)
+		fmt.Printf("读取图片失败: %v", err)
 		return err
 	}
 
@@ -146,13 +145,13 @@ func saveImage(path string, imageData []byte) error {
 	// 确保目录存在
 	dir := filepath.Dir(path)
 	if err := os.MkdirAll(dir, 0755); err != nil {
-		log.Printf("创建目录 %s 失败: %v", dir, err)
+		fmt.Printf("创建目录 %s 失败: %v", dir, err)
 		return err
 	}
 
 	// 写入文件
 	if err := os.WriteFile(path, imageData, 0644); err != nil {
-		log.Printf("写入文件 %s 失败: %v", path, err)
+		fmt.Printf("写入文件 %s 失败: %v", path, err)
 		return err
 	}
 

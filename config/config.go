@@ -3,7 +3,6 @@ package config
 import (
 	_ "embed"
 	"fmt"
-	"log"
 	"sync"
 
 	"github.com/spf13/viper"
@@ -54,13 +53,13 @@ func loadConfig() {
 
 	// 尝试读取并解析配置文件
 	if err := v.ReadInConfig(); err != nil {
-		log.Printf("配置读取失败: %v，将使用默认配置", err)
+		fmt.Printf("配置读取失败: %v，将使用默认配置", err)
 		return
 	}
 
 	// 解析配置到结构体
 	if err := v.Unmarshal(globalConfig); err != nil {
-		log.Printf("配置解析失败: %v，将使用默认配置", err)
+		fmt.Printf("配置解析失败: %v，将使用默认配置", err)
 		return
 	}
 
