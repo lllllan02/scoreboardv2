@@ -22,5 +22,5 @@ export default defineConfig({
     },
   },
   // 配置静态资源目录，将项目根目录下的data文件夹设置为静态资源目录
-  publicDir: path.resolve(__dirname, '../data'),
+  publicDir: path.resolve(__dirname, '..'),
 }) 

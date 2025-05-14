@@ -100,16 +100,9 @@ const ContestCard: React.FC<ContestCardProps> = ({ contest }) => {
 
   const status = getStatusContent();
   const progress = getContestProgress();
-
-  // 处理图片路径，移除"data/"前缀
-  const getImagePath = (path?: string) => {
-    if (!path) return "";
-    // 如果路径以"data/"开头，则移除这个前缀
-    return path.startsWith("data/") ? `/${path.substring(5)}` : `/${path}`;
-  };
-
+  
   const [logoError, setLogoError] = React.useState(false);
-  const logoPath = getImagePath(contest.config.logo?.path);
+  const logoPath = contest.config.logo?.path;
   
   return (
     <Link to={`/${contest.board_link}`} className="contest-link">
