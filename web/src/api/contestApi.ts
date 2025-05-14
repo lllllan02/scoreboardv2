@@ -4,10 +4,10 @@ import { Contest } from '../types/contest';
 // 使用相对路径，通过Vite代理转发请求
 const API_URL = '/api';
 
-export const getContestList = async (contestName: string = ''): Promise<Contest[]> => {
+export const getContestList = async (contest_name: string = ''): Promise<Contest[]> => {
   try {
     const response = await axios.get(`${API_URL}/contests`, {
-      params: { contestName }
+      params: { contest_name: contest_name }
     });
     
     console.log('API响应原始数据:', response);
