@@ -20,10 +20,7 @@ var (
 
 func main() {
 	fmt.Println("开始爬取比赛列表...")
-	contestList := fetchContestList()
-
-	// 下载比赛 LOGO
-	helper.DownloadLogo(contestList)
+	fetchContestList()
 }
 
 func fetchContestList() model.ContestList {
@@ -47,6 +44,9 @@ func fetchContestList() model.ContestList {
 	if err := json.Unmarshal(body, &contestList); err != nil {
 		log.Fatal(err)
 	}
+
+	// 下载比赛 LOGO
+	helper.DownloadLogo(contestList)
 
 	// 格式化JSON为美观缩进格式
 	prettyJSON, err := json.MarshalIndent(contestList, "", "  ")
