@@ -97,7 +97,8 @@
 }
 
 .detail-first-to-solve {
-  background-color: #52c41a;
+  background-color: #389e0d;
+  font-weight: bold;
 }
 
 .detail-solved {
