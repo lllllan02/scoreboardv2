@@ -37,3 +37,19 @@ func GetContestConfig(c *gin.Context) {
 	// 返回数据
 	errors.SendSuccess(c, config)
 }
+
+// GetContestRank 返回比赛排名数据
+func GetContestRank(c *gin.Context) {
+	// 获取请求路径
+	path := c.Param("path")
+
+	// 调用服务层获取数据
+	rank, err := service.GetContestRank(path)
+	if err != nil {
+		errors.SendError(c, err)
+		return
+	}
+
+	// 返回数据
+	errors.SendSuccess(c, rank)
+}

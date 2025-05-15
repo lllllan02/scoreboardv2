@@ -5,13 +5,10 @@ import (
 	"sort"
 	"strings"
 
-	"github.com/lllllan02/scoreboardv2/config"
 	"github.com/lllllan02/scoreboardv2/internal/model"
+	"github.com/lllllan02/scoreboardv2/pkg/errors"
 	"github.com/lllllan02/scoreboardv2/pkg/files"
 )
-
-// 数据目录路径
-var dataPath = config.GetConfig().Data.Path
 
 // GetContestList 获取比赛列表数据
 func GetContestList(contestName string) ([]*model.Contest, error) {
@@ -21,7 +18,7 @@ func GetContestList(contestName string) ([]*model.Contest, error) {
 	// 加载比赛列表
 	var contestList model.ContestList
 	if err := files.Load(filePath, &contestList); err != nil {
-		return nil, err
+		return nil, errors.ErrContestListNotFound
 	}
 
 	// 遍历比赛列表

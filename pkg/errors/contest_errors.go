@@ -15,6 +15,16 @@ var (
 		Message:    "比赛配置数据不存在",
 	}
 
+	ErrContestTeamNotFound = &ServiceError{
+		StatusCode: http.StatusNotFound,
+		Message:    "比赛队伍数据不存在",
+	}
+
+	ErrContestRunNotFound = &ServiceError{
+		StatusCode: http.StatusNotFound,
+		Message:    "比赛运行数据不存在",
+	}
+
 	// 400 - 请求参数错误
 	ErrEmptyContestPath = &ServiceError{
 		StatusCode: http.StatusBadRequest,
