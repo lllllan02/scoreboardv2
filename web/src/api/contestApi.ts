@@ -1,8 +1,8 @@
 import axios from 'axios';
-import { Contest } from '../types/contest';
+import { Contest, ContestConfig } from '../types/contest';
 
 // 使用相对路径，通过Vite代理转发请求
-const API_URL = '/api';
+export const API_URL = '/api';
 
 export const getContestList = async (contest_name: string = ''): Promise<Contest[]> => {
   try {
@@ -24,6 +24,28 @@ export const getContestList = async (contest_name: string = ''): Promise<Contest
     }
   } catch (error) {
     console.error('获取比赛列表失败:', error);
+    throw error;
+  }
+};
+
+// 获取比赛配置
+export const getContestConfig = async (path: string): Promise<ContestConfig> => {
+  try {
+    const response = await axios.get(`${API_URL}/config/${path}`);
+    
+    console.log('获取比赛配置响应:', response);
+    
+    // 检查响应数据格式并处理
+    if (response.data && response.data.data) {
+      return response.data.data;
+    } else if (response.data) {
+      return response.data;
+    } else {
+      console.warn('API返回的比赛配置格式不符合预期:', response.data);
+      throw new Error('比赛配置数据格式错误');
+    }
+  } catch (error) {
+    console.error('获取比赛配置失败:', error);
     throw error;
   }
 };

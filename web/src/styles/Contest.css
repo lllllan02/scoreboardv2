@@ -1,0 +1,375 @@
+.detail-contest-container {
+  max-width: 100%;
+  padding: 20px;
+  margin: 0 auto;
+}
+
+.detail-contest-header {
+  text-align: center;
+  margin-bottom: 20px;
+  padding-bottom: 15px;
+  border-bottom: 1px solid #eaeaea;
+}
+
+.detail-contest-header h1 {
+  font-size: 28px;
+  margin-bottom: 15px;
+  font-weight: 500;
+}
+
+.detail-contest-header .detail-controls {
+  display: flex;
+  justify-content: center;
+  gap: 10px;
+  margin-top: 10px;
+}
+
+.detail-contest-time-info {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 10px;
+}
+
+.detail-time-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.detail-status-tag {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 4px 10px;
+  border-radius: 20px;
+  font-size: 14px;
+  font-weight: 500;
+}
+
+.detail-status-finished {
+  background-color: #f6ffed;
+  color: #52c41a;
+  border: 1px solid #b7eb8f;
+}
+
+.detail-status-running {
+  background-color: #e6f7ff;
+  color: #1890ff;
+  border: 1px solid #91d5ff;
+}
+
+.detail-status-pending {
+  background-color: #fff7e6;
+  color: #fa8c16;
+  border: 1px solid #ffd591;
+}
+
+.detail-contest-duration {
+  display: flex;
+  justify-content: space-between;
+  color: #333;
+  padding: 8px 15px;
+  border-radius: 4px;
+  margin-bottom: 20px;
+}
+
+.detail-problem-legend {
+  display: flex;
+  flex-wrap: nowrap;
+  justify-content: center;
+  gap: 4px;
+  overflow-x: auto;
+  scrollbar-width: none; /* Firefox */
+  -ms-overflow-style: none; /* IE and Edge */
+}
+
+.detail-problem-legend::-webkit-scrollbar {
+  display: none; /* Chrome, Safari, Opera */
+}
+
+.detail-legend-item {
+  padding: 3px 6px;
+  border-radius: 3px;
+  font-size: 12px;
+  color: #fff;
+  white-space: nowrap;
+}
+
+.detail-first-to-solve {
+  background-color: #52c41a;
+}
+
+.detail-solved {
+  background-color: #52c41a;
+}
+
+.detail-attempted {
+  background-color: #ff4d4f;
+}
+
+.detail-pending {
+  background-color: #1890ff;
+}
+
+.detail-frozen {
+  background-color: #d9d9d9;
+  color: #666;
+}
+
+.detail-gold {
+  background-color: #ffc53d;
+  color: #000;
+}
+
+.detail-silver {
+  background-color: #d9d9d9;
+  color: #000;
+}
+
+.detail-bronze {
+  background-color: #d48806;
+  color: #fff;
+}
+
+.detail-honorable {
+  background-color: #ff7875;
+}
+
+.detail-loading-spinner {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 300px;
+}
+
+.detail-error-message {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 300px;
+  color: #ff4d4f;
+  font-size: 16px;
+}
+
+/* 进度条和时间显示新样式 */
+.detail-progress-section {
+  margin: 20px 0;
+  position: relative;
+}
+
+.detail-time-display {
+  display: flex;
+  justify-content: space-between;
+  margin-top: 5px;
+  color: #666;
+}
+
+.detail-progress-container {
+  margin: 20px 0;
+}
+
+.detail-progress-bar {
+  height: 10px;
+  background-color: #e8e8e8;
+  border-radius: 5px;
+  overflow: hidden;
+  position: relative;
+}
+
+.detail-progress-fill {
+  height: 100%;
+  background-color: #1890ff;
+  border-radius: 5px;
+  transition: width 0.3s ease;
+}
+
+/* 添加条纹效果 */
+.detail-progress-striped {
+  background-image: linear-gradient(
+    45deg,
+    rgba(255, 255, 255, 0.2) 25%,
+    transparent 25%,
+    transparent 50%,
+    rgba(255, 255, 255, 0.2) 50%,
+    rgba(255, 255, 255, 0.2) 75%,
+    transparent 75%,
+    transparent
+  );
+  background-size: 30px 30px;
+  animation: progress-bar-stripes 2s linear infinite;
+}
+
+@keyframes progress-bar-stripes {
+  from {
+    background-position: 30px 0;
+  }
+  to {
+    background-position: 0 0;
+  }
+}
+
+/* 进度条滑块样式 */
+.detail-progress-slider {
+  position: absolute;
+  top: 50%;
+  transform: translate(-50%, -50%);
+  cursor: grab;
+  z-index: 10;
+}
+
+.detail-slider-handle {
+  width: 24px;
+  height: 24px;
+  background-color: #fff;
+  border: 2px solid #1890ff;
+  border-radius: 50%;
+  box-shadow: 0 0 6px rgba(0, 0, 0, 0.2);
+  transition: all 0.15s ease;
+}
+
+.detail-slider-handle:hover {
+  transform: scale(1.1);
+  border-color: #40a9ff;
+  box-shadow: 0 0 8px rgba(24, 144, 255, 0.4);
+}
+
+.detail-slider-handle:active {
+  cursor: grabbing;
+  transform: scale(1.15);
+}
+
+.detail-progress-arrow {
+  color: #1890ff;
+  font-size: 18px;
+  margin-left: 8px;
+}
+
+.detail-status-badge {
+  display: inline-block;
+  padding: 2px 8px;
+  border-radius: 10px;
+  font-size: 12px;
+  font-weight: 500;
+  background-color: #e6f7ff;
+  color: #1890ff;
+  margin-right: 8px;
+}
+
+.detail-status-badge.success {
+  background-color: #f6ffed;
+  color: #52c41a;
+}
+
+.detail-status-badge.warning {
+  background-color: #fff7e6;
+  color: #fa8c16;
+}
+
+.detail-status-badge.finished {
+  background-color: #f6ffed;
+  color: #52c41a;
+}
+
+/* 增强FINISHED状态样式 */
+.ant-badge-status-text {
+  font-size: 14px;
+}
+
+/* 加强成功状态点的视觉效果 */
+.ant-badge-status-success .ant-badge-status-dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background-color: #52c41a;
+  box-shadow: 0 0 0 2px rgba(82, 196, 26, 0.2);
+}
+
+.detail-contest-content {
+  margin-top: 20px;
+}
+
+/* 新增样式类，用于替换内联样式 */
+.detail-status-dot {
+  display: inline-block;
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  background-color: #52c41a;
+  box-shadow: 0 0 0 2px rgba(82, 196, 26, 0.2);
+  margin-right: 10px;
+  vertical-align: middle;
+}
+
+.detail-status-text {
+  font-size: 15px;
+  font-weight: bold;
+  vertical-align: middle;
+}
+
+.detail-contest-title {
+  text-align: center;
+  font-size: 30px;
+  margin-bottom: 40px;
+  margin-top: 40px;
+}
+
+.detail-main-container {
+  width: 85%;
+  margin: 0 auto;
+}
+
+.detail-time-container {
+  width: 100%;
+  margin: 0 auto;
+}
+
+.detail-time-info {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 12px;
+}
+
+.detail-progress-bar-custom {
+  height: 15px;
+  position: relative;
+}
+
+.detail-duration-container {
+  display: flex;
+  justify-content: space-between;
+  margin-top: 12px;
+  align-items: center;
+}
+
+.detail-content-placeholder {
+  text-align: center;
+  padding: 30px 0;
+}
+
+.detail-error-icon {
+  margin-right: 8px;
+}
+
+.detail-home-button {
+  position: absolute;
+  top: 20px;
+  left: 20px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 16px;
+  background-color: #f0f0f0;
+  border-radius: 6px;
+  color: #333;
+  font-size: 14px;
+  font-weight: 500;
+  text-decoration: none;
+  transition: all 0.2s ease;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.detail-home-button:hover {
+  background-color: #e0e0e0;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+} 
