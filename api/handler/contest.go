@@ -21,3 +21,19 @@ func GetContestList(c *gin.Context) {
 	// 返回数据
 	errors.SendSuccess(c, contestList)
 }
+
+// GetContestConfig 返回比赛配置数据
+func GetContestConfig(c *gin.Context) {
+	// 获取请求路径
+	path := c.Param("path")
+
+	// 调用服务层获取数据
+	config, err := service.GetContestConfig(path)
+	if err != nil {
+		errors.SendError(c, err)
+		return
+	}
+
+	// 返回数据
+	errors.SendSuccess(c, config)
+}

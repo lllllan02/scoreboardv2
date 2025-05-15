@@ -2,9 +2,23 @@ package files
 
 import (
 	"encoding/json"
+	"errors"
 	"os"
 	"path/filepath"
 )
+
+func Load[T any](path string, target T) error {
+	if _, err := os.Stat(path); os.IsNotExist(err) {
+		return errors.New("文件不存在")
+	}
+
+	file, err := os.Open(path)
+	if err != nil {
+		return err
+	}
+
+	return json.NewDecoder(file).Decode(target)
+}
 
 // Save 保存数据到本地
 func Save(path string, data any) error {

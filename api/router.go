@@ -32,6 +32,8 @@ func SetupRouter() *gin.Engine {
 	// API 路由
 	// 获取比赛列表
 	r.GET("/api/contests", handler.GetContestList)
+	// 获取比赛配置
+	r.GET("/api/config/*path", handler.GetContestConfig)
 
 	return r
 }
