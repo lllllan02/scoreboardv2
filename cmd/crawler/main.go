@@ -84,6 +84,9 @@ func fetchConfig(link string) {
 	// 下载比赛 LOGO
 	helper.FetchLogo(&contest)
 
+	// 下载比赛横幅
+	helper.FetchBanner(&contest)
+
 	// 保存比赛配置
 	files.Save(filePath, contest.Config)
 }

@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useRef, useCallback } from "react";
+import React, { useEffect, useState, useRef, useCallback, useMemo } from "react";
 import { useLocation, Link } from "react-router-dom";
 import { getContestConfig } from "../api/contestApi";
 import { ContestConfig } from "../types/contest";
@@ -19,12 +19,11 @@ const Contest: React.FC = () => {
   // 引用DOM元素
   const progressBarRef = useRef<HTMLDivElement>(null);
 
-  // 使用useLocation获取完整路径
+  // 使用 useLocation 获取完整路径
   const location = useLocation();
-  const fullPath = location.pathname;
 
-  // 获取有效路径(去掉开头的斜杠)
-  const apiPath = fullPath.startsWith("/") ? fullPath.substring(1) : fullPath;
+  // 获取有效路径
+  const apiPath = location.pathname;
 
   // 处理鼠标移动
   const handleMouseMove = useCallback((e: MouseEvent) => {
@@ -101,6 +100,33 @@ const Contest: React.FC = () => {
     );
   };
 
+  const [bannerError, setBannerError] = useState(false);
+  
+  // 处理banner路径
+  const bannerPath = useMemo(() => {
+    // 检查路径是否存在
+    if (!contestConfig?.banner?.path) return null;
+    
+    const path = contestConfig.banner.path;
+    
+    // 如果是完整URL，直接返回
+    if (path.startsWith('http://') || path.startsWith('https://')) {
+      return path;
+    }
+    
+    // 如果是相对路径，添加前缀
+    // 注意：这里的路径前缀需要根据实际情况调整
+    if (path.startsWith('/')) {
+      return path; // 已经是以/开头的绝对路径
+    }
+    
+    // 其他情况，添加/前缀
+    return `/${path}`;
+  }, [contestConfig]);
+  
+  console.log("Banner路径:", bannerPath);
+  console.log("Banner加载错误状态:", bannerError);
+
   if (loading) {
     return (
       <div className="detail-loading-spinner">
@@ -134,7 +160,20 @@ const Contest: React.FC = () => {
         <HomeOutlined />
         <span>返回首页</span>
       </Link>
-      
+
+      {/* 显示比赛横幅 */}
+      {bannerPath && !bannerError && (
+        <img
+          src={bannerPath}
+          alt={`${contestConfig.contest_name} 横幅`}
+          className="detail-contest-banner"
+          onError={() => {
+            console.error("横幅图片加载失败:", bannerPath);
+            setBannerError(true);
+          }}
+        />
+      )}
+
       {/* 标题居中，增加下方间距 */}
       <h1 className="detail-contest-title">{contestConfig.contest_name}</h1>
 

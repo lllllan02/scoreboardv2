@@ -10,7 +10,11 @@ import {
 import { Contest } from "../types/contest";
 import { Link } from "react-router-dom";
 import "../styles/ContestCard.css";
-import { formatTime, formatDuration, getContestStatus } from "../utils/timeUtils";
+import {
+  formatTime,
+  formatDuration,
+  getContestStatus,
+} from "../utils/timeUtils";
 
 interface ContestCardProps {
   contest: Contest;
@@ -34,10 +38,10 @@ const ContestCard: React.FC<ContestCardProps> = ({ contest }) => {
   // 获取状态图标和文本
   const getStatusContent = () => {
     const status = getContestStatus(
-      contest.config.start_time, 
+      contest.config.start_time,
       contest.config.end_time
     );
-    
+
     let icon;
     let text;
     let className;
@@ -64,25 +68,25 @@ const ContestCard: React.FC<ContestCardProps> = ({ contest }) => {
 
   const status = getStatusContent();
   const progress = getContestProgress();
-  
+
   const [logoError, setLogoError] = React.useState(false);
   const logoPath = contest.config.logo?.path;
-  
+
   return (
     <Link to={`${contest.board_link}`} className="contest-link">
       <div className="contest-card-new">
         <div className="contest-header">
           {logoPath && !logoError && (
-            <img 
+            <img
               src={logoPath}
-              alt="Contest Logo" 
+              alt="Contest Logo"
               className="contest-logo"
               onError={() => setLogoError(true)}
             />
           )}
           <h3 className="contest-title">{contest.config.contest_name}</h3>
         </div>
-        
+
         <div className="contest-main">
           <div className="contest-time-info">
             <div className="time-item">
@@ -92,10 +96,13 @@ const ContestCard: React.FC<ContestCardProps> = ({ contest }) => {
             </div>
             <div className="time-item">
               <ClockCircleOutlined className="time-icon" />
-              <span>持续时长: {formatDuration(
-                contest.config.start_time,
-                contest.config.end_time
-              )}</span>
+              <span>
+                持续时长:{" "}
+                {formatDuration(
+                  contest.config.start_time,
+                  contest.config.end_time
+                )}
+              </span>
             </div>
           </div>
 

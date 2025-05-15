@@ -16,6 +16,7 @@ type ContestConfig struct {
 	BalloonColor      []BalloonColor    `json:"balloon_color,omitempty"`
 	Logo              Logo              `json:"logo,omitempty"`
 	Link              Link              `json:"link,omitempty"`
+	Banner            Banner            `json:"banner,omitempty"`
 	Options           Options           `json:"options,omitempty"`
 }
 
@@ -56,6 +57,12 @@ type Logo struct {
 type Link struct {
 	Homepage     string `json:"homepage,omitempty"`
 	Registration string `json:"registration,omitempty"`
+}
+
+// Banner 定义横幅的结构体
+type Banner struct {
+	Url  string `json:"url,omitempty"`
+	Path string `json:"path,omitempty"`
 }
 
 // Options 定义选项的结构体

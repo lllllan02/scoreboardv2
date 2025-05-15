@@ -38,7 +38,12 @@ func DownloadLogo(contestList model.ContestList) {
 
 	// 处理各种不同类型的比赛
 	for _, contest := range contestList.Walk() {
+		// 设置当前处理的对象名称，用于进度条显示
+		logobar.SetCurrentObject(contest.BoardLink)
+		// 下载比赛 LOGO
 		FetchLogo(contest)
+		// 更新进度条
+		logobar.Add(1)
 	}
 
 	// 完成进度条
@@ -72,9 +77,6 @@ func countTasks(contestList model.ContestList) int {
 }
 
 func FetchLogo(contest *model.Contest) {
-	// 设置当前处理的对象名称，用于进度条显示
-	logobar.SetCurrentObject(contest.BoardLink)
-
 	path := filepath.Join(path, contest.BoardLink, "logo.png")
 
 	// 处理 Base64 编码的 logo
@@ -100,8 +102,20 @@ func FetchLogo(contest *model.Contest) {
 	contest.Config.Logo.Path = path
 	contest.Config.Logo.Preset = ""
 	contest.Config.Logo.Base64 = ""
+}
 
-	logobar.Add(1) // 更新进度条
+// FetchBanner 下载比赛的横幅文件
+func FetchBanner(contest *model.Contest) {
+	if contest.Config.Banner.Url == "" {
+		return
+	}
+
+	path := filepath.Join(path, contest.BoardLink, "banner.png")
+	url := fmt.Sprintf("https://board.xcpcio.com/%s", filepath.Join("data", contest.BoardLink, contest.Config.Banner.Url))
+
+	fetchImage(url, path)
+
+	contest.Config.Banner.Path = path
 }
 
 // saveBase64Image 将Base64编码的图片保存到文件

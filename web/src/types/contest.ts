@@ -21,6 +21,7 @@ export interface ContestConfig {
   balloon_color?: BalloonColor[];
   logo?: Logo;
   link?: Link;
+  banner?: Banner;
   options?: Options;
   frozen?: boolean;
   unfrozen?: boolean;
@@ -63,6 +64,12 @@ export interface Logo {
 export interface Link {
   homepage?: string;
   registration?: string;
+}
+
+// Banner 类型
+export interface Banner {
+  url?: string;
+  path?: string;
 }
 
 // 选项类型
