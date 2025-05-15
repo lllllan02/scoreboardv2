@@ -146,34 +146,33 @@ const Contest: React.FC = () => {
       return <div className="problem-cell"></div>;
     }
     
-    // 根据题目状态设置样式类名
-    let className = "";
-    if (problem.first_solved) {
-      className = "detail-first-to-solve";
-    } else if (problem.solved) {
-      className = "detail-solved";
-    } else if (problem.attempted) {
-      className = "detail-attempted";
-    } else if (problem.pending || problem.frozen) {
-      className = "detail-pending";
-    }
-
-    // 构建显示内容
-    let content = "";
+    // 分开显示加号/减号和数字
+    let display = "";
+    
     if (problem.solved) {
-      content = `+${problem.timestamp}`;
-      if (problem.dirt > 0) {
-        content += `/${problem.dirt}`;
+      // 已解决，显示时间和错误次数
+      if (problem.timestamp > 0) {
+        display = problem.dirt > 0 
+          ? `${problem.timestamp}/${problem.dirt}` 
+          : `${problem.timestamp}`;
       }
+      return (
+        <div className="problem-cell">
+          <div className="content-solved">{display}</div>
+        </div>
+      );
     } else if (problem.attempted) {
-      content = `-${problem.submitted}`;
+      // 尝试但未解决，显示提交次数
+      display = problem.submitted > 0 ? `${problem.submitted}` : "";
+      return (
+        <div className="problem-cell">
+          <div className="content-attempted">{display}</div>
+        </div>
+      );
     }
 
-    return (
-      <div className={`problem-cell ${className}`}>
-        {content}
-      </div>
-    );
+    // 没有提交，返回空白单元格
+    return <div className="problem-cell"></div>;
   };
 
   // 构建表格列
@@ -182,47 +181,54 @@ const Contest: React.FC = () => {
 
     const columns: ColumnsType<Row> = [
       {
-        title: "#",
-        key: "rank",
-        width: 50,
+        title: "Place",
+        key: "place",
+        width: "5%",
         render: (_, __, index: number) => index + 1,
+        className: "place-column"
       },
       {
-        title: "学校",
+        title: "School",
         dataIndex: "organization",
         key: "organization",
-        width: 200,
+        width: "15%",
       },
       {
-        title: "队伍",
+        title: "Team",
         dataIndex: "team",
         key: "team",
-        width: 200,
+        width: "15%",
       },
       {
-        title: "解题数",
+        title: "Solved",
         dataIndex: "solved",
         key: "solved",
-        width: 80,
+        width: "5%",
         sorter: (a: Row, b: Row) => a.solved - b.solved,
       },
       {
-        title: "罚时",
+        title: "Penalty",
         dataIndex: "penalty",
         key: "penalty",
-        width: 80,
+        width: "5%",
         sorter: (a: Row, b: Row) => a.penalty - b.penalty,
       },
     ];
 
     // 添加题目列
+    const problemCount = contestConfig.problem_quantity || 0;
+    const remainingWidth = 50; // 剩余的50%平均分配给题目列
+    const problemWidth = problemCount > 0 ? (remainingWidth / problemCount) + "%" : "auto";
+    
     if (contestConfig.problem_quantity && contestConfig.problem_id) {
       for (let i = 0; i < contestConfig.problem_quantity; i++) {
-        const problemId = contestConfig.problem_id[i] || String.fromCharCode(65 + i);
+        // 使用字母A-Z标识题目，与图片保持一致
+        const problemId = String.fromCharCode(65 + i);
         columns.push({
           title: problemId,
           key: `problem-${i}`,
-          width: 80,
+          width: problemWidth,
+          className: `problem-column problem-${problemId.toLowerCase()}`,
           render: (record: Row) => {
             // 检查problems数组是否存在且长度足够
             if (!record.problems || record.problems.length <= i) {
@@ -233,6 +239,17 @@ const Contest: React.FC = () => {
         });
       }
     }
+
+    // 添加统计列
+    columns.push({
+      title: "Dirt",
+      key: "dirt",
+      width: "5%",
+      render: (record: Row) => {
+        const dirtPercent = Math.round(record.dirty * 100);
+        return `${dirtPercent}%`;
+      }
+    });
 
     return columns;
   };
@@ -371,10 +388,11 @@ const Contest: React.FC = () => {
           columns={getColumns()}
           rowKey="team_id"
           pagination={false}
-          bordered
+          bordered={false}
           size="small"
-          scroll={{ x: 'max-content' }}
           className="detail-scoreboard-table"
+          tableLayout="fixed"
+          style={{ width: '100%' }}
         />
       </div>
     </div>

@@ -318,6 +318,7 @@
 .detail-main-container {
   width: 85%;
   margin: 0 auto;
+  padding: 0 10px;
 }
 
 .detail-time-container {
@@ -387,60 +388,149 @@
 /* 排行榜样式 */
 .detail-scoreboard {
   margin-top: 20px;
-  overflow-x: auto;
+  width: 100%;
+  overflow: hidden;
 }
 
 .detail-scoreboard-table {
-  min-width: 100%;
+  width: 100%;
+  table-layout: fixed;
 }
 
-.detail-scoreboard-table .ant-table-tbody > tr > td {
-  padding: 8px;
-  text-align: center;
+/* 表格样式重置 */
+.detail-scoreboard-table .ant-table table {
+  border-collapse: separate;
+  border-spacing: 2px;
+  background-color: white;
 }
 
+/* 单元格样式 */
+.detail-scoreboard-table .ant-table-cell {
+  padding: 0 !important;
+  border: none !important;
+  background-clip: padding-box;
+  height: 100%;
+}
+
+.detail-scoreboard-table .ant-table-thead {
+  background-color: white;
+}
+
+.detail-scoreboard-table .ant-table-tbody {
+  background-color: white;
+}
+
+/* 表头整体样式 */
 .detail-scoreboard-table .ant-table-thead > tr > th {
-  padding: 10px;
+  padding: 4px 0;
   text-align: center;
   font-weight: bold;
-  background-color: #f0f2f5;
+  background-color: #f0ead2 !important; /* 浅黄色表头 */
+  height: 40px;
+}
+
+/* 排名列样式 */
+.detail-scoreboard-table .ant-table-thead > tr > th:nth-child(1),
+.detail-scoreboard-table .ant-table-tbody > tr > td:nth-child(1) {
+  background-color: #f0ead2 !important; /* 浅黄色 */
+}
+
+/* 学校列样式 */
+.detail-scoreboard-table .ant-table-thead > tr > th:nth-child(2),
+.detail-scoreboard-table .ant-table-tbody > tr > td:nth-child(2) {
+  background-color: #f0ead2 !important; /* 浅黄色 */
+}
+
+/* 队伍列样式 */
+.detail-scoreboard-table .ant-table-thead > tr > th:nth-child(3),
+.detail-scoreboard-table .ant-table-tbody > tr > td:nth-child(3) {
+  background-color: #f0ead2 !important; /* 浅黄色 */
+}
+
+/* 解题数列样式 */
+.detail-scoreboard-table .ant-table-thead > tr > th:nth-child(4),
+.detail-scoreboard-table .ant-table-tbody > tr > td:nth-child(4) {
+  background-color: #f0ead2 !important; /* 浅黄色 */
+}
+
+/* 罚时列样式 */
+.detail-scoreboard-table .ant-table-thead > tr > th:nth-child(5),
+.detail-scoreboard-table .ant-table-tbody > tr > td:nth-child(5) {
+  background-color: #f0ead2 !important; /* 浅黄色 */
+}
+
+/* 表体单元格样式 */
+.detail-scoreboard-table .ant-table-tbody > tr > td {
+  padding: 0;
+  text-align: center;
+  height: 40px;
+  background-color: white;
 }
 
 /* 问题单元格样式 */
 .problem-cell {
   width: 100%;
   height: 100%;
+  min-height: 40px;
   display: flex;
   align-items: center;
   justify-content: center;
-  padding: 8px;
-  min-width: 60px;
-  font-weight: 500;
+  margin: 0;
+  padding: 0;
+  background-color: white;
 }
 
-/* 首个解决问题 */
-.problem-cell.detail-first-to-solve {
-  background-color: #389e0d;
+/* 为已解决的问题添加绿色背景 */
+.content-solved {
   color: white;
+  background-color: #52c41a;
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 8px 0;
+}
+
+/* 为尝试但未解决的问题添加红色背景 */
+.content-attempted {
+  color: white;
+  background-color: #ff4d4f;
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 8px 0;
+}
+
+/* 单元格内容布局 */
+.cell-content {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  line-height: 1.2;
+}
+
+.content-top {
+  font-weight: bold;
+  font-size: 13px;
+}
+
+.content-bottom {
+  font-size: 12px;
+}
+
+/* 首个解决问题 - 不设置背景色 */
+.problem-cell.detail-first-to-solve {
   font-weight: bold;
 }
 
-/* 已解决问题 */
-.problem-cell.detail-solved {
-  background-color: #52c41a;
-  color: white;
-}
-
-/* 尝试但未解决问题 */
-.problem-cell.detail-attempted {
-  background-color: #ff4d4f;
-  color: white;
-}
-
-/* 等待评判或封榜 */
-.problem-cell.detail-pending {
-  background-color: #1890ff;
-  color: white;
+/* 设置列样式 - 解决题目数和罚时列不同颜色 */
+.detail-scoreboard-table .ant-table-tbody > tr > td:nth-child(4),
+.detail-scoreboard-table .ant-table-tbody > tr > td:nth-child(5) {
+  font-weight: bold;
 }
 
 /* 响应式调整 */
@@ -453,4 +543,35 @@
     padding: 4px;
     min-width: 40px;
   }
+}
+
+/* 列标题颜色 - 为表头专用 */
+.detail-scoreboard-table .ant-table-thead > tr > th.problem-a { background-color: #f5222d !important; color: white !important; }
+.detail-scoreboard-table .ant-table-thead > tr > th.problem-b { background-color: #fa8c16 !important; color: white !important; }
+.detail-scoreboard-table .ant-table-thead > tr > th.problem-c { background-color: #722ed1 !important; color: white !important; }
+.detail-scoreboard-table .ant-table-thead > tr > th.problem-d { background-color: #fadb14 !important; color: black !important; }
+.detail-scoreboard-table .ant-table-thead > tr > th.problem-e { background-color: #52c41a !important; color: white !important; }
+.detail-scoreboard-table .ant-table-thead > tr > th.problem-f { background-color: #eb2f96 !important; color: white !important; }
+.detail-scoreboard-table .ant-table-thead > tr > th.problem-g { background-color: #1890ff !important; color: white !important; }
+.detail-scoreboard-table .ant-table-thead > tr > th.problem-h { background-color: #13c2c2 !important; color: white !important; }
+.detail-scoreboard-table .ant-table-thead > tr > th.problem-i { background-color: #8c8c8c !important; color: white !important; }
+.detail-scoreboard-table .ant-table-thead > tr > th.problem-j { background-color: #faad14 !important; color: white !important; }
+.detail-scoreboard-table .ant-table-thead > tr > th.problem-k { background-color: #5054bb !important; color: white !important; }
+.detail-scoreboard-table .ant-table-thead > tr > th.problem-l { background-color: #08979c !important; color: white !important; }
+.detail-scoreboard-table .ant-table-thead > tr > th.problem-m { background-color: #333333 !important; color: white !important; }
+
+/* 首列标题 */
+.place-column {
+  text-align: center;
+}
+
+/* 问题列样式 */
+.problem-column {
+  background-color: rgba(0, 0, 0, 0.02);
+}
+
+/* Dirt列样式 - 最后一列 */
+.detail-scoreboard-table .ant-table-thead > tr > th:last-child,
+.detail-scoreboard-table .ant-table-tbody > tr > td:last-child {
+  background-color: #f0ead2 !important; /* 浅黄色 */
 } 
