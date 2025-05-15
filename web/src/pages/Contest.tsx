@@ -7,8 +7,11 @@ import React, {
 } from "react";
 import { useLocation, Link } from "react-router-dom";
 import { getContestConfig } from "../api/contestApi";
+import { getContestRank } from "../api/rankApi";
 import { ContestConfig } from "../types/contest";
-import { Spin, Tooltip } from "antd";
+import { Rank, Row, Problem } from "../types/rank";
+import { Spin, Tooltip, Table } from "antd";
+import type { ColumnsType } from "antd/es/table";
 import { CloseCircleOutlined, HomeOutlined } from "@ant-design/icons";
 import "../styles/Contest.css";
 import { formatTime, formatDuration } from "../utils/timeUtils";
@@ -20,6 +23,7 @@ const Contest: React.FC = () => {
   const [contestConfig, setContestConfig] = useState<ContestConfig | null>(
     null
   );
+  const [rankData, setRankData] = useState<Rank | null>(null);
   const [sliderPosition, setSliderPosition] = useState(100); // 滑块位置，百分比
 
   // 引用DOM元素
@@ -70,22 +74,27 @@ const Contest: React.FC = () => {
   }, [handleMouseMove, handleTouchMove]);
 
   useEffect(() => {
-    const fetchContestConfig = async () => {
+    const fetchData = async () => {
       try {
         setLoading(true);
         setError(null);
 
+        // 获取比赛配置
         const config = await getContestConfig(apiPath);
         setContestConfig(config);
+
+        // 获取排行榜数据
+        const rank = await getContestRank(apiPath);
+        setRankData(rank);
       } catch (err) {
-        console.error("获取比赛配置失败:", err);
-        setError("获取比赛配置失败，请检查路径是否正确");
+        console.error("获取数据失败:", err);
+        setError("获取数据失败，请检查路径是否正确");
       } finally {
         setLoading(false);
       }
     };
 
-    fetchContestConfig();
+    fetchData();
 
     // 组件卸载时清理事件监听器
     return () => {
@@ -130,6 +139,104 @@ const Contest: React.FC = () => {
     return `/${path}`;
   }, [contestConfig]);
 
+  // 渲染题目单元格
+  const renderProblemCell = (problem: Problem | undefined) => {
+    // 如果问题不存在，返回空单元格
+    if (!problem) {
+      return <div className="problem-cell"></div>;
+    }
+    
+    // 根据题目状态设置样式类名
+    let className = "";
+    if (problem.first_solved) {
+      className = "detail-first-to-solve";
+    } else if (problem.solved) {
+      className = "detail-solved";
+    } else if (problem.attempted) {
+      className = "detail-attempted";
+    } else if (problem.pending || problem.frozen) {
+      className = "detail-pending";
+    }
+
+    // 构建显示内容
+    let content = "";
+    if (problem.solved) {
+      content = `+${problem.timestamp}`;
+      if (problem.dirt > 0) {
+        content += `/${problem.dirt}`;
+      }
+    } else if (problem.attempted) {
+      content = `-${problem.submitted}`;
+    }
+
+    return (
+      <div className={`problem-cell ${className}`}>
+        {content}
+      </div>
+    );
+  };
+
+  // 构建表格列
+  const getColumns = (): ColumnsType<Row> => {
+    if (!contestConfig || !rankData) return [];
+
+    const columns: ColumnsType<Row> = [
+      {
+        title: "#",
+        key: "rank",
+        width: 50,
+        render: (_, __, index: number) => index + 1,
+      },
+      {
+        title: "学校",
+        dataIndex: "organization",
+        key: "organization",
+        width: 200,
+      },
+      {
+        title: "队伍",
+        dataIndex: "team",
+        key: "team",
+        width: 200,
+      },
+      {
+        title: "解题数",
+        dataIndex: "solved",
+        key: "solved",
+        width: 80,
+        sorter: (a: Row, b: Row) => a.solved - b.solved,
+      },
+      {
+        title: "罚时",
+        dataIndex: "penalty",
+        key: "penalty",
+        width: 80,
+        sorter: (a: Row, b: Row) => a.penalty - b.penalty,
+      },
+    ];
+
+    // 添加题目列
+    if (contestConfig.problem_quantity && contestConfig.problem_id) {
+      for (let i = 0; i < contestConfig.problem_quantity; i++) {
+        const problemId = contestConfig.problem_id[i] || String.fromCharCode(65 + i);
+        columns.push({
+          title: problemId,
+          key: `problem-${i}`,
+          width: 80,
+          render: (record: Row) => {
+            // 检查problems数组是否存在且长度足够
+            if (!record.problems || record.problems.length <= i) {
+              return <div className="problem-cell"></div>;
+            }
+            return renderProblemCell(record.problems[i]);
+          },
+        });
+      }
+    }
+
+    return columns;
+  };
+
   if (loading) {
     return (
       <div className="detail-loading-spinner">
@@ -147,11 +254,11 @@ const Contest: React.FC = () => {
     );
   }
 
-  if (!contestConfig) {
+  if (!contestConfig || !rankData) {
     return (
       <div className="detail-error-message">
         <CloseCircleOutlined className="detail-error-icon" />
-        比赛配置不存在
+        比赛配置或排行榜数据不存在
       </div>
     );
   }
@@ -258,8 +365,17 @@ const Contest: React.FC = () => {
       </div>
 
       {/* 榜单内容 */}
-      <div className="detail-content-placeholder">
-        <p>榜单内容将在此处显示</p>
+      <div className="detail-scoreboard">
+        <Table 
+          dataSource={rankData?.rows || []}
+          columns={getColumns()}
+          rowKey="team_id"
+          pagination={false}
+          bordered
+          size="small"
+          scroll={{ x: 'max-content' }}
+          className="detail-scoreboard-table"
+        />
       </div>
     </div>
   );

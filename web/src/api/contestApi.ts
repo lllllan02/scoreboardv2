@@ -1,12 +1,9 @@
 import axios from 'axios';
 import { Contest, ContestConfig } from '../types/contest';
 
-// 使用相对路径，通过Vite代理转发请求
-export const API_URL = '/api';
-
 export const getContestList = async (contest_name: string = ''): Promise<Contest[]> => {
   try {
-    const response = await axios.get(`${API_URL}/contests`, {
+    const response = await axios.get(`/api/contests`, {
       params: { contest_name: contest_name }
     });
     
@@ -31,7 +28,7 @@ export const getContestList = async (contest_name: string = ''): Promise<Contest
 // 获取比赛配置
 export const getContestConfig = async (path: string): Promise<ContestConfig> => {
   try {
-    const response = await axios.get(`${API_URL}/config/${path}`);
+    const response = await axios.get(`/api/config/${path}`);
     
     console.log('获取比赛配置响应:', response);
     
