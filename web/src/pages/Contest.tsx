@@ -1,4 +1,10 @@
-import React, { useEffect, useState, useRef, useCallback, useMemo } from "react";
+import React, {
+  useEffect,
+  useState,
+  useRef,
+  useCallback,
+  useMemo,
+} from "react";
 import { useLocation, Link } from "react-router-dom";
 import { getContestConfig } from "../api/contestApi";
 import { ContestConfig } from "../types/contest";
@@ -101,31 +107,28 @@ const Contest: React.FC = () => {
   };
 
   const [bannerError, setBannerError] = useState(false);
-  
+
   // 处理banner路径
   const bannerPath = useMemo(() => {
     // 检查路径是否存在
     if (!contestConfig?.banner?.path) return null;
-    
+
     const path = contestConfig.banner.path;
-    
+
     // 如果是完整URL，直接返回
-    if (path.startsWith('http://') || path.startsWith('https://')) {
+    if (path.startsWith("http://") || path.startsWith("https://")) {
       return path;
     }
-    
+
     // 如果是相对路径，添加前缀
     // 注意：这里的路径前缀需要根据实际情况调整
-    if (path.startsWith('/')) {
+    if (path.startsWith("/")) {
       return path; // 已经是以/开头的绝对路径
     }
-    
+
     // 其他情况，添加/前缀
     return `/${path}`;
   }, [contestConfig]);
-  
-  console.log("Banner路径:", bannerPath);
-  console.log("Banner加载错误状态:", bannerError);
 
   if (loading) {
     return (
@@ -168,7 +171,6 @@ const Contest: React.FC = () => {
           alt={`${contestConfig.contest_name} 横幅`}
           className="detail-contest-banner"
           onError={() => {
-            console.error("横幅图片加载失败:", bannerPath);
             setBannerError(true);
           }}
         />
