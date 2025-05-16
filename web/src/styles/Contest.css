@@ -49,26 +49,26 @@
 
 .detail-status-finished {
   background-color: #f6ffed;
-  color: #52c41a;
+  color: #000;
   border: 1px solid #b7eb8f;
 }
 
 .detail-status-running {
   background-color: #e6f7ff;
-  color: #1890ff;
+  color: #000;
   border: 1px solid #91d5ff;
 }
 
 .detail-status-pending {
   background-color: #fff7e6;
-  color: #fa8c16;
+  color: #000;
   border: 1px solid #ffd591;
 }
 
 .detail-contest-duration {
   display: flex;
   justify-content: space-between;
-  color: #333;
+  color: #000;
   padding: 8px 15px;
   border-radius: 4px;
   margin-bottom: 20px;
@@ -92,17 +92,16 @@
   padding: 3px 6px;
   border-radius: 3px;
   font-size: 12px;
-  color: #fff;
+  color: #000;
   white-space: nowrap;
 }
 
 .detail-first-to-solve {
-  background-color: #389e0d;
-  font-weight: bold;
+  background-color: #3DB03D;
 }
 
 .detail-solved {
-  background-color: #52c41a;
+  background-color: #E1FFB5;
 }
 
 .detail-attempted {
@@ -115,7 +114,7 @@
 
 .detail-frozen {
   background-color: #d9d9d9;
-  color: #666;
+  color: #000;
 }
 
 .detail-gold {
@@ -130,11 +129,12 @@
 
 .detail-bronze {
   background-color: #d48806;
-  color: #fff;
+  color: #000;
 }
 
 .detail-honorable {
   background-color: #ff7875;
+  color: #000;
 }
 
 .detail-loading-spinner {
@@ -149,7 +149,7 @@
   justify-content: center;
   align-items: center;
   height: 300px;
-  color: #ff4d4f;
+  color: #000;
   font-size: 16px;
 }
 
@@ -163,7 +163,7 @@
   display: flex;
   justify-content: space-between;
   margin-top: 5px;
-  color: #666;
+  color: #000;
 }
 
 .detail-progress-container {
@@ -241,7 +241,7 @@
 }
 
 .detail-progress-arrow {
-  color: #1890ff;
+  color: #000;
   font-size: 18px;
   margin-left: 8px;
 }
@@ -253,23 +253,23 @@
   font-size: 12px;
   font-weight: 500;
   background-color: #e6f7ff;
-  color: #1890ff;
+  color: #000;
   margin-right: 8px;
 }
 
 .detail-status-badge.success {
   background-color: #f6ffed;
-  color: #52c41a;
+  color: #000;
 }
 
 .detail-status-badge.warning {
   background-color: #fff7e6;
-  color: #fa8c16;
+  color: #000;
 }
 
 .detail-status-badge.finished {
   background-color: #f6ffed;
-  color: #52c41a;
+  color: #000;
 }
 
 /* 增强FINISHED状态样式 */
@@ -282,7 +282,7 @@
   width: 10px;
   height: 10px;
   border-radius: 50%;
-  background-color: #52c41a;
+  background-color: #E1FFB5;
   box-shadow: 0 0 0 2px rgba(82, 196, 26, 0.2);
 }
 
@@ -296,7 +296,7 @@
   width: 12px;
   height: 12px;
   border-radius: 50%;
-  background-color: #52c41a;
+  background-color: #E1FFB5;
   box-shadow: 0 0 0 2px rgba(82, 196, 26, 0.2);
   margin-right: 10px;
   vertical-align: middle;
@@ -363,7 +363,7 @@
   padding: 8px 16px;
   background-color: #f0f0f0;
   border-radius: 6px;
-  color: #333;
+  color: #000;
   font-size: 14px;
   font-weight: 500;
   text-decoration: none;
@@ -482,8 +482,8 @@
 
 /* 为已解决的问题添加绿色背景 */
 .content-solved {
-  color: white;
-  background-color: #52c41a;
+  color: black;
+  background-color: #E1FFB5;
   width: 100%;
   height: 100%;
   display: flex;
@@ -492,9 +492,15 @@
   padding: 8px 0;
 }
 
+/* 为首个解决的问题添加深绿色背景 */
+.content-first-to-solve {
+  background-color: #3DB03D;
+  color: #000;
+}
+
 /* 为尝试但未解决的问题添加红色背景 */
 .content-attempted {
-  color: white;
+  color: black;
   background-color: #ff4d4f;
   width: 100%;
   height: 100%;
@@ -504,6 +510,20 @@
   padding: 8px 0;
 }
 
+/* 为等待评判或冻结的问题添加蓝色背景 */
+.content-pending {
+  color: #000;
+  background-color: #1890ff;
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 8px 0;
+  font-weight: bold;
+  font-size: 16px;
+}
+
 /* 单元格内容布局 */
 .cell-content {
   display: flex;
@@ -511,11 +531,14 @@
   align-items: center;
   justify-content: center;
   line-height: 1.2;
+  width: 100%;
+  height: 100%;
 }
 
 .content-top {
   font-weight: bold;
-  font-size: 13px;
+  font-size: 16px;
+  margin-bottom: 2px;
 }
 
 .content-bottom {
@@ -545,21 +568,6 @@
   }
 }
 
-/* 列标题颜色 - 为表头专用 */
-.detail-scoreboard-table .ant-table-thead > tr > th.problem-a { background-color: #f5222d !important; color: white !important; }
-.detail-scoreboard-table .ant-table-thead > tr > th.problem-b { background-color: #fa8c16 !important; color: white !important; }
-.detail-scoreboard-table .ant-table-thead > tr > th.problem-c { background-color: #722ed1 !important; color: white !important; }
-.detail-scoreboard-table .ant-table-thead > tr > th.problem-d { background-color: #fadb14 !important; color: black !important; }
-.detail-scoreboard-table .ant-table-thead > tr > th.problem-e { background-color: #52c41a !important; color: white !important; }
-.detail-scoreboard-table .ant-table-thead > tr > th.problem-f { background-color: #eb2f96 !important; color: white !important; }
-.detail-scoreboard-table .ant-table-thead > tr > th.problem-g { background-color: #1890ff !important; color: white !important; }
-.detail-scoreboard-table .ant-table-thead > tr > th.problem-h { background-color: #13c2c2 !important; color: white !important; }
-.detail-scoreboard-table .ant-table-thead > tr > th.problem-i { background-color: #8c8c8c !important; color: white !important; }
-.detail-scoreboard-table .ant-table-thead > tr > th.problem-j { background-color: #faad14 !important; color: white !important; }
-.detail-scoreboard-table .ant-table-thead > tr > th.problem-k { background-color: #5054bb !important; color: white !important; }
-.detail-scoreboard-table .ant-table-thead > tr > th.problem-l { background-color: #08979c !important; color: white !important; }
-.detail-scoreboard-table .ant-table-thead > tr > th.problem-m { background-color: #333333 !important; color: white !important; }
-
 /* 首列标题 */
 .place-column {
   text-align: center;
@@ -567,7 +575,44 @@
 
 /* 问题列样式 */
 .problem-column {
-  background-color: rgba(0, 0, 0, 0.02);
+  padding: 0 !important;
+  text-align: center;
+}
+
+/* 题目标题样式 */
+.problem-title {
+  font-weight: bold;
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0;
+  padding: 8px 0;
+  border-radius: 0;
+  font-size: 14px;
+  position: relative;
+  right: 1px; /* 修复右侧白线问题 */
+  box-sizing: border-box;
+}
+
+/* 覆盖antd的默认标题单元格样式 */
+.detail-scoreboard-table .ant-table-thead > tr > th.problem-column {
+  padding: 0 !important;
+  overflow: hidden;
+  vertical-align: middle;
+  background-color: transparent !important;
+  height: auto;
+  border-spacing: 0;
+  border-collapse: collapse;
+}
+
+/* 修复题目标题的内容样式 */
+.detail-scoreboard-table .ant-table-thead > tr > th.problem-column .ant-table-cell-content {
+  width: 100%;
+  height: 100%;
+  margin: 0;
+  padding: 0;
 }
 
 /* Dirt列样式 - 最后一列 */

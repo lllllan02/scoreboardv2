@@ -15,6 +15,7 @@ import type { ColumnsType } from "antd/es/table";
 import { CloseCircleOutlined, HomeOutlined } from "@ant-design/icons";
 import "../styles/Contest.css";
 import { formatTime, formatDuration } from "../utils/timeUtils";
+import { getContrastColor } from "../utils/colorUtils";
 
 const Contest: React.FC = () => {
   // 状态管理
@@ -145,28 +146,54 @@ const Contest: React.FC = () => {
     if (!problem) {
       return <div className="problem-cell"></div>;
     }
-    
-    // 分开显示加号/减号和数字
-    let display = "";
-    
+
+    // 准备显示内容
+    let symbol = "";
+    let timeInfo =
+      problem.timestamp > 0
+        ? `${problem.submitted}/${problem.timestamp}`
+        : "";
+
     if (problem.solved) {
-      // 已解决，显示时间和错误次数
-      if (problem.timestamp > 0) {
-        display = problem.dirt > 0 
-          ? `${problem.timestamp}/${problem.dirt}` 
-          : `${problem.timestamp}`;
-      }
+      // 已解决，添加加号标记
+      symbol = "+";
+
       return (
         <div className="problem-cell">
-          <div className="content-solved">{display}</div>
+          <div className={`content-solved ${problem.first_solved ? 'content-first-to-solve' : ''}`}>
+            <div className="cell-content">
+              <div className="content-top">{symbol}</div>
+              {timeInfo && <div className="content-bottom">{timeInfo}</div>}
+            </div>
+          </div>
         </div>
       );
     } else if (problem.attempted) {
-      // 尝试但未解决，显示提交次数
-      display = problem.submitted > 0 ? `${problem.submitted}` : "";
+      // 尝试但未解决，添加减号标记
+      symbol = "-";
+
       return (
         <div className="problem-cell">
-          <div className="content-attempted">{display}</div>
+          <div className="content-attempted">
+            <div className="cell-content">
+              <div className="content-top">{symbol}</div>
+              {timeInfo && <div className="content-bottom">{timeInfo}</div>}
+            </div>
+          </div>
+        </div>
+      );
+    } else if (problem.pending || problem.frozen) {
+      // 等待评判或处于冻结状态，显示问号
+      symbol = "?";
+
+      return (
+        <div className="problem-cell">
+          <div className="content-pending">
+            <div className="cell-content">
+              <div className="content-top">{symbol}</div>
+              {timeInfo && <div className="content-bottom">{timeInfo}</div>}
+            </div>
+          </div>
         </div>
       );
     }
@@ -185,7 +212,7 @@ const Contest: React.FC = () => {
         key: "place",
         width: "5%",
         render: (_, __, index: number) => index + 1,
-        className: "place-column"
+        className: "place-column",
       },
       {
         title: "School",
@@ -218,17 +245,49 @@ const Contest: React.FC = () => {
     // 添加题目列
     const problemCount = contestConfig.problem_quantity || 0;
     const remainingWidth = 50; // 剩余的50%平均分配给题目列
-    const problemWidth = problemCount > 0 ? (remainingWidth / problemCount) + "%" : "auto";
-    
+    const problemWidth =
+      problemCount > 0 ? remainingWidth / problemCount + "%" : "auto";
+
     if (contestConfig.problem_quantity && contestConfig.problem_id) {
       for (let i = 0; i < contestConfig.problem_quantity; i++) {
         // 使用字母A-Z标识题目，与图片保持一致
         const problemId = String.fromCharCode(65 + i);
+
+        // 获取气球颜色设置
+        const balloonStyle: React.CSSProperties = {};
+        if (contestConfig.balloon_color && contestConfig.balloon_color[i]) {
+          const balloon = contestConfig.balloon_color[i];
+          if (balloon.background_color) {
+            balloonStyle.backgroundColor = balloon.background_color;
+            // 根据背景颜色亮度自动设置文字颜色
+            balloonStyle.color = getContrastColor(balloon.background_color);
+          }
+        } else {
+          // 默认颜色
+          balloonStyle.backgroundColor = "#1890ff";
+          balloonStyle.color = "white";
+        }
+
         columns.push({
-          title: problemId,
+          title: () => (
+            <div
+              className="problem-title"
+              style={{
+                ...balloonStyle,
+                width: "100%",
+                height: "100%",
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+                padding: "8px 0",
+              }}
+            >
+              {problemId}
+            </div>
+          ),
           key: `problem-${i}`,
           width: problemWidth,
-          className: `problem-column problem-${problemId.toLowerCase()}`,
+          className: `problem-column`,
           render: (record: Row) => {
             // 检查problems数组是否存在且长度足够
             if (!record.problems || record.problems.length <= i) {
@@ -248,7 +307,7 @@ const Contest: React.FC = () => {
       render: (record: Row) => {
         const dirtPercent = Math.round(record.dirty * 100);
         return `${dirtPercent}%`;
-      }
+      },
     });
 
     return columns;
@@ -383,7 +442,7 @@ const Contest: React.FC = () => {
 
       {/* 榜单内容 */}
       <div className="detail-scoreboard">
-        <Table 
+        <Table
           dataSource={rankData?.rows || []}
           columns={getColumns()}
           rowKey="team_id"
@@ -392,7 +451,7 @@ const Contest: React.FC = () => {
           size="small"
           className="detail-scoreboard-table"
           tableLayout="fixed"
-          style={{ width: '100%' }}
+          style={{ width: "100%" }}
         />
       </div>
     </div>

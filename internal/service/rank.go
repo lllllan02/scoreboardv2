@@ -81,12 +81,6 @@ func GetContestRank(path string) (*Rank, error) {
 		LastSolved:  make([]int, config.ProblemQuantity),
 	}
 
-	// 初始化 FirstSolved 数组为 -1，表示没有队伍解决
-	for i := range rank.FirstSolved {
-		rank.FirstSolved[i] = -1
-		rank.LastSolved[i] = -1
-	}
-
 	// 遍历提交记录
 	for _, run := range runList {
 		teamId := string(run.TeamId)         // 队伍 id
@@ -113,7 +107,6 @@ func GetContestRank(path string) (*Rank, error) {
 			// 题目统计
 			row.Problems[problemIndex].Solved = true                               // 设置为已解决
 			row.Problems[problemIndex].Penalty += penalty                          // 通过的提交加当前时间
-			row.Problems[problemIndex].Timestamp = penalty                         // 设置通过时间
 			row.Problems[problemIndex].Dirt = row.Problems[problemIndex].Submitted // 累计通过题目的错误次数
 
 			// 队伍统计
@@ -123,14 +116,16 @@ func GetContestRank(path string) (*Rank, error) {
 			// 排行榜统计
 			rank.LastSolved[problemIndex] = penalty // 设置为最后一个解决
 			if rank.FirstSolved[problemIndex] == 0 {
-				rank.FirstSolved[problemIndex] = penalty // 设置为第一个解决
+				rank.FirstSolved[problemIndex] = penalty      // 设置为第一个解决
+				row.Problems[problemIndex].FirstSolved = true // 设置为第一个解决
 			}
 		} else {
 			row.Problems[problemIndex].Penalty += 20 // 错误的提交算 20 分钟罚时
 		}
 
-		row.Problems[problemIndex].Attempted = true // 设置为尝试过
-		row.Problems[problemIndex].Submitted++      // 提交次数加一
+		row.Problems[problemIndex].Timestamp = penalty // 设置通过时间
+		row.Problems[problemIndex].Attempted = true    // 设置为尝试过
+		row.Problems[problemIndex].Submitted++         // 提交次数加一
 	}
 
 	// 将队伍信息添加到排行榜
