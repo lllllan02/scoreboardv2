@@ -150,9 +150,7 @@ const Contest: React.FC = () => {
     // 准备显示内容
     let symbol = "";
     let timeInfo =
-      problem.timestamp > 0
-        ? `${problem.submitted}/${problem.timestamp}`
-        : "";
+      problem.timestamp > 0 ? `${problem.submitted}/${problem.timestamp}` : "";
 
     if (problem.solved) {
       // 已解决，添加加号标记
@@ -160,7 +158,11 @@ const Contest: React.FC = () => {
 
       return (
         <div className="problem-cell">
-          <div className={`content-solved ${problem.first_solved ? 'content-first-to-solve' : ''}`}>
+          <div
+            className={`content-solved ${
+              problem.first_solved ? "content-first-to-solve" : ""
+            }`}
+          >
             <div className="cell-content">
               <div className="content-top">{symbol}</div>
               {timeInfo && <div className="content-bottom">{timeInfo}</div>}
@@ -211,18 +213,50 @@ const Contest: React.FC = () => {
         title: "Place",
         dataIndex: "place",
         key: "place",
-        width: "5%",
+        width: 55,
         className: "place-column",
       },
       {
         title: "School",
         dataIndex: "organization",
         key: "organization",
-        width: "15%",
+        width: 150,
         render: (text: string, record: Row) => (
-          <div style={{ display: 'flex', alignItems: 'center', position: 'relative', width: '100%' }}>
-            {record.org_place > 0 && <div style={{ fontSize: '12px', color: '#000', position: 'absolute', left: '8px' }}>{record.org_place}</div>}
-            <div style={{ width: '100%', textAlign: 'center' }}>{text}</div>
+          <div
+            style={{
+              display: "flex",
+              alignItems: "center",
+              position: "relative",
+              width: "100%",
+              overflow: "hidden",
+            }}
+          >
+            {record.org_place > 0 && (
+              <div
+                style={{
+                  fontSize: "12px",
+                  color: "#000",
+                  position: "absolute",
+                  left: "8px",
+                  minWidth: "20px",
+                }}
+              >
+                {record.org_place}
+              </div>
+            )}
+            <div 
+              style={{ 
+                width: "100%", 
+                textAlign: "center", 
+                paddingLeft: record.org_place > 0 ? "25px" : "0",
+                overflow: "hidden",
+                textOverflow: "ellipsis",
+                whiteSpace: "nowrap"
+              }}
+              title={text}
+            >
+              {text}
+            </div>
           </div>
         ),
       },
@@ -230,29 +264,24 @@ const Contest: React.FC = () => {
         title: "Team",
         dataIndex: "team",
         key: "team",
-        width: "15%",
+        width: 140,
       },
       {
         title: "Solved",
         dataIndex: "solved",
         key: "solved",
-        width: "5%",
-        sorter: (a: Row, b: Row) => a.solved - b.solved,
+        width: 65,
       },
       {
         title: "Penalty",
         dataIndex: "penalty",
         key: "penalty",
-        width: "5%",
-        sorter: (a: Row, b: Row) => a.penalty - b.penalty,
+        width: 70,
       },
     ];
 
-    // 添加题目列
-    const problemCount = contestConfig.problem_quantity || 0;
-    const remainingWidth = 50; // 剩余的50%平均分配给题目列
-    const problemWidth =
-      problemCount > 0 ? remainingWidth / problemCount + "%" : "auto";
+    // 使用精确的固定宽度而不是相对单位
+    const fixedProblemWidth = 45; // 增加宽度
 
     if (contestConfig.problem_quantity && contestConfig.problem_id) {
       for (let i = 0; i < contestConfig.problem_quantity; i++) {
@@ -285,14 +314,15 @@ const Contest: React.FC = () => {
                 display: "flex",
                 alignItems: "center",
                 justifyContent: "center",
-                padding: "8px 0",
+                padding: "4px 0",
+                fontSize: "14px", // 增加字体大小
               }}
             >
               {problemId}
             </div>
           ),
           key: `problem-${i}`,
-          width: problemWidth,
+          width: fixedProblemWidth,
           className: `problem-column`,
           render: (record: Row) => {
             // 检查problems数组是否存在且长度足够
@@ -307,9 +337,27 @@ const Contest: React.FC = () => {
 
     // 添加统计列
     columns.push({
-      title: "Dirt",
+      title: () => (
+        <div
+          className="problem-title"
+          style={{
+            backgroundColor: "#f0ead2", // 使用与基础列相同的浅黄色背景
+            color: "#000",
+            width: "100%",
+            height: "100%",
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            padding: "4px 0",
+            fontSize: "14px", // 增加字体大小
+          }}
+        >
+          Dirt
+        </div>
+      ),
       key: "dirt",
-      width: "5%",
+      width: 45, // 增加宽度
+      className: "problem-column",
       render: (record: Row) => {
         const dirtPercent = Math.round(record.dirty * 100);
         return `${dirtPercent}%`;
@@ -457,7 +505,9 @@ const Contest: React.FC = () => {
           size="small"
           className="detail-scoreboard-table"
           tableLayout="fixed"
-          style={{ width: "100%" }}
+          style={{ width: "auto", tableLayout: "fixed" }}
+          scroll={{ x: true }}
+          rowClassName={() => "compact-row"}
         />
       </div>
     </div>

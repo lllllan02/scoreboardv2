@@ -388,23 +388,84 @@
 /* 排行榜样式 */
 .detail-scoreboard {
   margin-top: 20px;
-  width: 100%;
-  overflow: hidden;
+  width: auto;
+  overflow-x: auto;
+  max-width: 100%;
+  min-width: 500px; /* 稍微减小最小宽度 */
+  display: flex;
+  justify-content: center;
 }
 
 .detail-scoreboard-table {
-  width: 100%;
+  width: auto;
   table-layout: fixed;
+  margin: 0 auto; /* 表格居中 */
+  box-shadow: none; /* 移除阴影 */
+  border: none; /* 确保没有边框 */
+}
+
+/* 确保表格包装器没有边框 */
+.detail-scoreboard-table.ant-table-wrapper {
+  border: none;
+  background-color: transparent;
+}
+
+/* 确保表格本身没有边框 */
+.detail-scoreboard-table .ant-table {
+  border: none;
+  background-color: transparent;
+}
+
+/* 确保列宽设置被严格应用 */
+.detail-scoreboard-table .ant-table-container {
+  table-layout: fixed !important;
+}
+
+.detail-scoreboard-table .ant-table-thead > tr > th,
+.detail-scoreboard-table .ant-table-tbody > tr > td {
+  box-sizing: border-box;
+}
+
+/* 设置Dirt列与题目列相同样式 */
+.detail-scoreboard-table .ant-table-thead > tr > th:last-child,
+.detail-scoreboard-table .ant-table-tbody > tr > td:last-child {
+  width: 45px !important; /* 增加列宽 */
+  min-width: 45px !important;
+  max-width: 45px !important;
+  padding: 0 !important;
+  text-align: center;
+}
+
+/* 重置最后一列的背景色，让它通过problem-column类来控制 */
+.detail-scoreboard-table .ant-table-thead > tr > th:last-child {
+  background-color: transparent !important;
+}
+
+/* 题目标题样式 */
+.problem-title {
+  font-weight: bold;
+  width: 100%;
+  height: 28px; /* 与表头高度一致 */
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0;
+  padding: 0;
+  border-radius: 0;
+  font-size: 14px; /* 增加字体大小 */
+  position: relative;
+  box-sizing: border-box;
 }
 
 /* 表格样式重置 */
 .detail-scoreboard-table .ant-table table {
   border-collapse: separate;
-  border-spacing: 2px;
-  background-color: white;
+  border-spacing: 1px; /* 恢复单元格间隙 */
+  background-color: transparent;
+  border: none;
 }
 
-/* 单元格样式 */
+/* 单元格通用样式 */
 .detail-scoreboard-table .ant-table-cell {
   padding: 0 !important;
   border: none !important;
@@ -413,20 +474,21 @@
 }
 
 .detail-scoreboard-table .ant-table-thead {
-  background-color: white;
+  background-color: transparent;
 }
 
 .detail-scoreboard-table .ant-table-tbody {
-  background-color: white;
+  background-color: transparent;
 }
 
 /* 表头整体样式 */
 .detail-scoreboard-table .ant-table-thead > tr > th {
-  padding: 2px 0;
+  padding: 0 !important;
   text-align: center;
   font-weight: bold;
   background-color: #f0ead2 !important; /* 浅黄色表头 */
-  height: 32px;
+  height: 28px; /* 调整高度 */
+  line-height: 28px; /* 设置行高与高度一致 */
 }
 
 /* 排名列样式 */
@@ -439,6 +501,12 @@
 .detail-scoreboard-table .ant-table-thead > tr > th:nth-child(2),
 .detail-scoreboard-table .ant-table-tbody > tr > td:nth-child(2) {
   background-color: #f0ead2 !important; /* 浅黄色 */
+}
+
+/* 学校列中的学校名样式 */
+.detail-scoreboard-table .ant-table-tbody > tr > td:nth-child(2) div {
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 /* 队伍列样式 */
@@ -465,19 +533,23 @@
   text-align: center;
   height: 32px;
   background-color: white;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 /* 问题单元格样式 */
 .problem-cell {
   width: 100%;
   height: 100%;
-  min-height: 32px;
+  min-height: 36px; /* 增加最小高度 */
   display: flex;
   align-items: center;
   justify-content: center;
   margin: 0;
   padding: 0;
   background-color: white;
+  overflow: hidden;
 }
 
 /* 为已解决的问题添加绿色背景 */
@@ -489,7 +561,7 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  padding: 4px 0;
+  padding: 6px 0; /* 增加内边距 */
 }
 
 /* 为首个解决的问题添加深绿色背景 */
@@ -507,7 +579,7 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  padding: 4px 0;
+  padding: 6px 0; /* 增加内边距 */
 }
 
 /* 为等待评判或冻结的问题添加蓝色背景 */
@@ -519,7 +591,7 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  padding: 4px 0;
+  padding: 6px 0; /* 增加内边距 */
   font-weight: bold;
   font-size: 14px;
 }
@@ -530,19 +602,23 @@
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  line-height: 1.2;
+  line-height: 1.1;
   width: 100%;
   height: 100%;
 }
 
 .content-top {
   font-weight: bold;
-  font-size: 14px;
-  margin-bottom: 1px;
+  font-size: 14px; /* 增加字体大小 */
+  margin-bottom: 0px;
 }
 
 .content-bottom {
-  font-size: 11px;
+  font-size: 11px; /* 略微增加字体大小 */
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 100%;
 }
 
 /* 首个解决问题 - 不设置背景色 */
@@ -553,7 +629,7 @@
 /* 设置列样式 - 解决题目数和罚时列不同颜色 */
 .detail-scoreboard-table .ant-table-tbody > tr > td:nth-child(4),
 .detail-scoreboard-table .ant-table-tbody > tr > td:nth-child(5) {
-  font-weight: bold;
+  font-weight: normal;
 }
 
 /* 响应式调整 */
@@ -563,8 +639,13 @@
   }
   
   .problem-cell {
-    padding: 4px;
+    padding: 2px;
     min-width: 40px;
+  }
+  
+  .detail-scoreboard {
+    min-width: 100%;
+    padding: 0 5px;
   }
 }
 
@@ -577,23 +658,9 @@
 .problem-column {
   padding: 0 !important;
   text-align: center;
-}
-
-/* 题目标题样式 */
-.problem-title {
-  font-weight: bold;
-  width: 100%;
-  height: 100%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  margin: 0;
-  padding: 4px 0;
-  border-radius: 0;
-  font-size: 14px;
-  position: relative;
-  right: 1px; /* 修复右侧白线问题 */
-  box-sizing: border-box;
+  width: 45px !important; /* 增加列宽 */
+  min-width: 45px !important;
+  max-width: 45px !important;
 }
 
 /* 覆盖antd的默认标题单元格样式 */
@@ -602,9 +669,13 @@
   overflow: hidden;
   vertical-align: middle;
   background-color: transparent !important;
-  height: auto;
+  height: 28px; /* 确保与其他标题单元格高度一致 */
+  line-height: 28px; /* 确保行高一致 */
   border-spacing: 0;
   border-collapse: collapse;
+  width: 45px !important; /* 增加列宽 */
+  min-width: 45px !important;
+  max-width: 45px !important;
 }
 
 /* 修复题目标题的内容样式 */
@@ -615,8 +686,71 @@
   padding: 0;
 }
 
-/* Dirt列样式 - 最后一列 */
-.detail-scoreboard-table .ant-table-thead > tr > th:last-child,
+/* 修复表格行间距 */
+.detail-scoreboard-table .ant-table-tbody > tr {
+  transition: none; /* 禁用动画效果 */
+}
+
+.detail-scoreboard-table .ant-table-thead > tr,
+.detail-scoreboard-table .ant-table-tbody > tr {
+  margin: 0;
+  padding: 0;
+}
+
+/* 确保antd表格组件不添加多余空间 */
+.detail-scoreboard-table .ant-table-container {
+  border-collapse: collapse;
+  margin: 0;
+  padding: 0;
+  border: none;
+  background-color: transparent;
+}
+
+.detail-scoreboard-table .ant-table-body {
+  margin: 0;
+  padding: 0;
+  border: none;
+  background-color: transparent;
+}
+
+/* 确保表格相关的所有元素都没有边框 */
+.detail-scoreboard-table *,
+.detail-scoreboard-table::before,
+.detail-scoreboard-table::after,
+.detail-scoreboard-table .ant-table,
+.detail-scoreboard-table .ant-table-container,
+.detail-scoreboard-table .ant-table-content,
+.detail-scoreboard-table .ant-table-body,
+.detail-scoreboard-table .ant-table-header {
+  border: none !important;
+}
+
+/* 紧凑行样式 */
+.compact-row td {
+  padding-top: 0 !important;
+  padding-bottom: 0 !important;
+  border-top: 0 !important;
+  height: 32px !important;
+}
+
+.detail-scoreboard-table .ant-table-thead > tr.compact-row {
+  padding-top: 0 !important;
+  padding-bottom: 0 !important;
+  border-bottom: 0 !important;
+}
+
+/* 进一步减少表头与表体间距 */
+.detail-scoreboard-table .ant-table-header {
+  margin-bottom: 0 !important;
+  padding-bottom: 0 !important;
+}
+
+.detail-scoreboard-table .ant-table-body {
+  margin-top: 0 !important;
+  padding-top: 0 !important;
+}
+
+/* 设置Dirt列的内容单元格背景色 */
 .detail-scoreboard-table .ant-table-tbody > tr > td:last-child {
   background-color: #f0ead2 !important; /* 浅黄色 */
 } 
