@@ -83,6 +83,10 @@ func GetContestRank(path string) (*Rank, error) {
 		LastSolved:  make([]int, config.ProblemQuantity),
 	}
 
+	for i := 0; i < config.ProblemQuantity; i++ {
+		rank.FirstSolved[i] = -1
+	}
+
 	// 遍历提交记录
 	for _, run := range runList {
 		teamId := string(run.TeamId)         // 队伍 id
@@ -117,7 +121,7 @@ func GetContestRank(path string) (*Rank, error) {
 
 			// 排行榜统计
 			rank.LastSolved[problemIndex] = penalty // 设置为最后一个解决
-			if rank.FirstSolved[problemIndex] == 0 {
+			if rank.FirstSolved[problemIndex] == -1 {
 				rank.FirstSolved[problemIndex] = penalty      // 设置为第一个解决
 				row.Problems[problemIndex].FirstSolved = true // 设置为第一个解决
 			}
