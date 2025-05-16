@@ -209,9 +209,9 @@ const Contest: React.FC = () => {
     const columns: ColumnsType<Row> = [
       {
         title: "Place",
+        dataIndex: "place",
         key: "place",
         width: "5%",
-        render: (_, __, index: number) => index + 1,
         className: "place-column",
       },
       {
@@ -219,6 +219,12 @@ const Contest: React.FC = () => {
         dataIndex: "organization",
         key: "organization",
         width: "15%",
+        render: (text: string, record: Row) => (
+          <div style={{ display: 'flex', alignItems: 'center', position: 'relative', width: '100%' }}>
+            {record.org_place > 0 && <div style={{ fontSize: '12px', color: '#000', position: 'absolute', left: '8px' }}>{record.org_place}</div>}
+            <div style={{ width: '100%', textAlign: 'center' }}>{text}</div>
+          </div>
+        ),
       },
       {
         title: "Team",

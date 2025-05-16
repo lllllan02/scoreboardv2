@@ -19,6 +19,8 @@ type Row struct {
 	TeamId       string    `json:"team_id"`      // 队伍 id
 	Team         string    `json:"team"`         // 队伍名称
 	Organization string    `json:"organization"` // 队伍组织
+	Place        int       `json:"place"`        // 排名
+	OrgPlace     int       `json:"org_place"`    // 组织排名
 	Solved       int       `json:"solved"`       // 解决题目数
 	Penalty      int       `json:"penalty"`      // 罚时
 	Dirty        float64   `json:"dirty"`        // 错误率
@@ -160,6 +162,18 @@ func GetContestRank(path string) (*Rank, error) {
 		}
 		return rank.Rows[i].Penalty < rank.Rows[j].Penalty
 	})
+
+	// 计算排名
+	place := 1
+	orgPlace := make(map[string]int)
+	for i, row := range rank.Rows {
+		row.Place = i + 1
+
+		if orgPlace[row.Organization] == 0 {
+			row.OrgPlace, place = place, place+1
+			orgPlace[row.Organization] = row.OrgPlace
+		}
+	}
 
 	return rank, nil
 }

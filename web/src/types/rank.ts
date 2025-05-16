@@ -15,6 +15,8 @@ export interface Row {
   team_id: string;       // 队伍 id
   team: string;          // 队伍名称
   organization: string;  // 队伍组织
+  place: number;         // 队伍排名
+  org_place: number;     // 组织排名
   solved: number;        // 解决题目数
   penalty: number;       // 罚时
   dirty: number;         // 错误率
