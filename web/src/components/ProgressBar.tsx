@@ -73,7 +73,7 @@ const ProgressBar: React.FC<ProgressBarProps> = ({
 
   return (
     <>
-      {/* 进度条 - 增加高度并添加条纹效果，加入滑块 */}
+      {/* 进度条 */}
       <div
         className="detail-progress-bar detail-progress-bar-custom"
         ref={progressBarRef}
@@ -94,7 +94,7 @@ const ProgressBar: React.FC<ProgressBarProps> = ({
         </div>
       </div>
 
-      {/* 持续时间和图例 - 更精确地对齐，贴近进度条 */}
+      {/* 持续时间和图例 */}
       <div className="detail-duration-container">
         <div>
           当前时间:{" "}
