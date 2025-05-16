@@ -39,7 +39,7 @@ type Problem struct {
 	Dirt        int  `json:"dirt"`         // 错误次数(前提是已经解决)
 }
 
-func GetContestRank(path string) (*Rank, error) {
+func GetContestRank(path string, t int) (*Rank, error) {
 	// 获取比赛配置
 	config, err := loadConfig(path)
 	if err != nil {
@@ -92,6 +92,10 @@ func GetContestRank(path string) (*Rank, error) {
 		teamId := string(run.TeamId)         // 队伍 id
 		problemIndex := run.ProblemId        // 题目索引
 		penalty := run.Timestamp / 1000 / 60 // 罚时
+
+		if run.Timestamp > t {
+			continue
+		}
 
 		// 如果队伍不存在，则跳过
 		row, ok := rows[teamId]

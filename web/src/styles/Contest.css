@@ -171,18 +171,30 @@
 }
 
 .detail-progress-bar {
-  height: 10px;
+  height: 15px;
   background-color: #e8e8e8;
   border-radius: 5px;
   overflow: hidden;
   position: relative;
+  cursor: pointer;
+  will-change: transform; /* 告诉浏览器该元素会有变化，优化性能 */
+  transform: translateZ(0); /* 强制GPU加速 */
 }
 
 .detail-progress-fill {
   height: 100%;
   background-color: #1890ff;
   border-radius: 5px;
-  transition: width 0.3s ease;
+  /* 拖动时不使用过渡动画 */
+  transition: none;
+  will-change: width; /* 告诉浏览器该属性会变化 */
+  transform: translateZ(0); /* 强制GPU加速 */
+  backface-visibility: hidden; /* 优化性能 */
+}
+
+/* 非拖动状态下使用过渡 */
+body:not(.dragging-active) .detail-progress-fill {
+  transition: width 0.1s ease-out;
 }
 
 /* 添加条纹效果 */
@@ -210,15 +222,37 @@
   }
 }
 
-/* 进度条滑块样式 */
+/* 滑块样式优化 */
 .detail-progress-slider {
   position: absolute;
   top: 50%;
-  transform: translate(-50%, -50%);
+  transform: translate3d(-50%, -50%, 0); /* 使用translate3d触发GPU加速 */
   cursor: grab;
   z-index: 10;
+  /* 拖动时不使用过渡动画 */
+  transition: none;
+  will-change: left, transform; /* 告诉浏览器这些属性会变化 */
+  backface-visibility: hidden; /* 优化性能 */
+  touch-action: none; /* 禁用触摸默认行为 */
+  pointer-events: auto; /* 确保可以接收指针事件 */
 }
 
+/* 非拖动状态下使用过渡 */
+body:not(.dragging-active) .detail-progress-slider {
+  transition: left 0.1s ease-out;
+}
+
+/* 拖动状态下的优化 */
+body.dragging-active {
+  user-select: none !important;
+  -webkit-user-select: none !important;
+  -moz-user-select: none !important;
+  -ms-user-select: none !important;
+  overflow: hidden; /* 防止拖动时页面滚动 */
+  cursor: grabbing;
+}
+
+/* 滑块手柄样式优化 */
 .detail-slider-handle {
   width: 24px;
   height: 24px;
@@ -226,7 +260,9 @@
   border: 2px solid #1890ff;
   border-radius: 50%;
   box-shadow: 0 0 6px rgba(0, 0, 0, 0.2);
-  transition: all 0.15s ease;
+  transition: transform 0.15s ease;
+  transform: translateZ(0); /* 强制GPU加速 */
+  will-change: transform; /* 告诉浏览器该属性会变化 */
 }
 
 .detail-slider-handle:hover {
@@ -324,6 +360,9 @@
 .detail-time-container {
   width: 100%;
   margin: 0 auto;
+  position: relative;
+  will-change: contents; /* 优化性能 */
+  transform: translateZ(0); /* 强制GPU加速 */
 }
 
 .detail-time-info {
@@ -342,6 +381,8 @@
   justify-content: space-between;
   margin-top: 12px;
   align-items: center;
+  will-change: contents; /* 优化性能 */
+  transform: translateZ(0); /* 强制GPU加速 */
 }
 
 .detail-content-placeholder {
@@ -394,6 +435,7 @@
   min-width: 500px; /* 稍微减小最小宽度 */
   display: flex;
   justify-content: center;
+  position: relative;
 }
 
 .detail-scoreboard-table {
@@ -688,7 +730,7 @@
 
 /* 修复表格行间距 */
 .detail-scoreboard-table .ant-table-tbody > tr {
-  transition: none; /* 禁用动画效果 */
+  transition: none !important;
 }
 
 .detail-scoreboard-table .ant-table-thead > tr,
@@ -813,4 +855,178 @@
 .detail-scoreboard-table-fixed {
   width: auto;
   table-layout: fixed;
+}
+
+/* 表格加载效果优化 */
+.detail-table-loading {
+  background: rgba(255, 255, 255, 0.6);
+  backdrop-filter: blur(1px);
+  border-radius: 4px;
+  z-index: 5;
+}
+
+/* 减少表格内部动画 */
+.detail-scoreboard-table .ant-table-tbody > tr {
+  transition: none !important;
+}
+
+.detail-scoreboard-table .ant-table-row {
+  background-transition: none !important;
+}
+
+.detail-scoreboard-table * {
+  transition: none;
+}
+
+/* 确保表格不会因内容变化而改变布局 */
+.detail-scoreboard-table .ant-table-cell {
+  position: relative;
+  overflow: hidden;
+}
+
+/* 进度条节流加载状态提示 */
+.detail-time-container {
+  position: relative;
+}
+
+.detail-time-loading-indicator {
+  position: absolute;
+  right: 10px;
+  top: 0;
+  font-size: 12px;
+  color: #1890ff;
+  opacity: 0.8;
+}
+
+/* 优化表格加载指示器样式 */
+.detail-scoreboard-table .ant-spin-container::after {
+  background: rgba(255, 255, 255, 0.5) !important;
+  backdrop-filter: blur(1px);
+}
+
+.detail-scoreboard-table .ant-spin-dot-item {
+  background-color: #1890ff;
+}
+
+/* 禁用表格内的所有动画以避免闪烁，但保留加载指示器的动画 */
+.detail-scoreboard-table * {
+  animation: none !important;
+  transition: none !important;
+}
+
+/* 动画仅用于加载指示器 */
+.detail-scoreboard-table .ant-spin-dot {
+  animation: antSpinMove 1s infinite linear !important;
+}
+
+.detail-scoreboard-table .ant-spin-dot-item {
+  animation: antSpinMove 1s infinite linear !important;
+}
+
+/* 平滑过渡的表格内容 */
+.detail-scoreboard-table .ant-table-body {
+  transition: none !important;
+}
+
+/* 表格加载指示器新样式 */
+.detail-table-loading-indicator {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  z-index: 100;
+  padding: 5px 12px;
+  background-color: rgba(255, 255, 255, 0.9);
+  border-radius: 4px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+  backdrop-filter: blur(2px);
+  display: flex;
+  align-items: center;
+}
+
+/* 确保表格内容在加载时不会改变 */
+.detail-scoreboard {
+  position: relative;
+}
+
+/* 进度条样式优化 */
+.detail-progress-bar {
+  cursor: pointer;
+}
+
+.detail-progress-fill {
+  will-change: width;
+}
+
+.detail-progress-slider {
+  will-change: left;
+}
+
+/* 防止拖动进度条时选择文本 */
+.detail-progress-bar,
+.detail-time-container,
+.detail-duration-container,
+.detail-problem-legend,
+.detail-legend-item,
+.detail-main-container,
+.detail-scoreboard *,
+.detail-contest-header {
+  user-select: none;
+  -webkit-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
+}
+
+/* 确保滑块元素可以正常拖动 - 重要修复 */
+.detail-progress-slider,
+.detail-slider-handle {
+  user-select: none;
+  -webkit-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
+  touch-action: none; /* 禁用触摸滚动，允许拖动 */
+  cursor: grab;
+  pointer-events: auto; /* 确保指针事件正常工作 */
+}
+
+/* 拖动时的光标样式 */
+.detail-progress-slider:active,
+body.dragging-active .detail-progress-slider {
+  cursor: grabbing !important;
+}
+
+/* 确保进度条可点击 */
+.detail-progress-bar {
+  cursor: pointer;
+  pointer-events: auto;
+}
+
+/* 在拖动状态下应用类来防止任何文本选择 */
+body.dragging-active {
+  user-select: none !important;
+  -webkit-user-select: none !important;
+  -moz-user-select: none !important;
+  -ms-user-select: none !important;
+  overflow: hidden; /* 防止拖动时页面滚动 */
+}
+
+/* 在拖动状态下设置所有元素不可选择 */
+body.dragging-active * {
+  user-select: none !important;
+  -webkit-user-select: none !important;
+  -moz-user-select: none !important;
+  -ms-user-select: none !important;
+}
+
+/* 确保整个进度条区域不可选择文本 */
+.detail-time-container * {
+  user-select: none;
+  -webkit-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
+}
+
+/* 拖动状态下取消过渡效果，确保实时响应 */
+body.dragging-active .detail-progress-fill,
+body.dragging-active .detail-progress-slider {
+  transition: none !important; /* 拖动时禁用过渡，确保滑块立即跟随 */
 } 

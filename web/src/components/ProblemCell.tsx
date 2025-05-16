@@ -15,7 +15,7 @@ const ProblemCell: React.FC<ProblemCellProps> = ({ problem }) => {
   // 准备显示内容
   let symbol = "";
   let timeInfo =
-    problem.timestamp > 0 ? `${problem.submitted}/${problem.timestamp}` : "";
+    problem.submitted > 0 ? `${problem.submitted}/${problem.timestamp}` : "";
 
   if (problem.solved) {
     // 已解决，添加加号标记
