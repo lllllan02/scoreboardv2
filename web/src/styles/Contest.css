@@ -174,11 +174,12 @@
   height: 15px;
   background-color: #e8e8e8;
   border-radius: 5px;
-  overflow: hidden;
+  overflow: visible; /* 修改为visible以确保滑块可见 */
   position: relative;
   cursor: pointer;
   will-change: transform; /* 告诉浏览器该元素会有变化，优化性能 */
   transform: translateZ(0); /* 强制GPU加速 */
+  margin-bottom: 15px; /* 增加底部间距，防止滑块被遮挡 */
 }
 
 .detail-progress-fill {
@@ -190,6 +191,7 @@
   will-change: width; /* 告诉浏览器该属性会变化 */
   transform: translateZ(0); /* 强制GPU加速 */
   backface-visibility: hidden; /* 优化性能 */
+  pointer-events: none; /* 确保不会捕获指针事件 */
 }
 
 /* 非拖动状态下使用过渡 */
@@ -235,6 +237,10 @@ body:not(.dragging-active) .detail-progress-fill {
   backface-visibility: hidden; /* 优化性能 */
   touch-action: none; /* 禁用触摸默认行为 */
   pointer-events: auto; /* 确保可以接收指针事件 */
+  user-select: none; /* 防止文本选择 */
+  -webkit-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
 }
 
 /* 非拖动状态下使用过渡 */
@@ -263,6 +269,7 @@ body.dragging-active {
   transition: transform 0.15s ease;
   transform: translateZ(0); /* 强制GPU加速 */
   will-change: transform; /* 告诉浏览器该属性会变化 */
+  touch-action: none; /* 禁用触摸默认行为 */
 }
 
 .detail-slider-handle:hover {
@@ -979,13 +986,13 @@ body.dragging-active {
 /* 确保滑块元素可以正常拖动 - 重要修复 */
 .detail-progress-slider,
 .detail-slider-handle {
-  user-select: none;
-  -webkit-user-select: none;
-  -moz-user-select: none;
-  -ms-user-select: none;
-  touch-action: none; /* 禁用触摸滚动，允许拖动 */
+  user-select: none !important;
+  -webkit-user-select: none !important;
+  -moz-user-select: none !important;
+  -ms-user-select: none !important;
+  touch-action: none !important; /* 禁用触摸滚动，允许拖动 */
   cursor: grab;
-  pointer-events: auto; /* 确保指针事件正常工作 */
+  pointer-events: auto !important; /* 确保指针事件正常工作 */
 }
 
 /* 拖动时的光标样式 */
@@ -1029,4 +1036,82 @@ body.dragging-active * {
 body.dragging-active .detail-progress-fill,
 body.dragging-active .detail-progress-slider {
   transition: none !important; /* 拖动时禁用过渡，确保滑块立即跟随 */
+}
+
+/* 增加滑块可点击区域 */
+.detail-slider-handle::before {
+  content: '';
+  position: absolute;
+  width: 44px;
+  height: 44px;
+  top: -10px;
+  left: -10px;
+  border-radius: 50%;
+}
+
+/* 移动端优化 */
+@media (max-width: 768px) {
+  .detail-slider-handle {
+    width: 28px;
+    height: 28px;
+  }
+  
+  .detail-progress-bar {
+    height: 18px;
+    margin-bottom: 20px;
+  }
+}
+
+/* rc-slider样式覆盖 */
+.detail-progress-bar-container {
+  width: 100%;
+  padding: 10px 0;
+}
+
+.detail-progress-bar-container .rc-slider {
+  height: 10px;
+}
+
+.detail-progress-bar-container .rc-slider-rail {
+  height: 10px;
+  background-color: #e0e0e0;
+}
+
+.detail-progress-bar-container .rc-slider-track {
+  height: 10px;
+  background-color: #4caf50;
+}
+
+.detail-progress-bar-container .rc-slider-handle {
+  margin-top: -5px;
+  width: 20px;
+  height: 20px;
+  border-color: #2e7d32;
+  background-color: #2e7d32;
+  opacity: 1;
+}
+
+.detail-progress-bar-container .rc-slider-handle:hover,
+.detail-progress-bar-container .rc-slider-handle:active,
+.detail-progress-bar-container .rc-slider-handle:focus {
+  border-color: #1b5e20;
+  box-shadow: 0 0 0 5px rgba(46, 125, 50, 0.2);
+}
+
+body.dragging-active {
+  cursor: grabbing;
+  user-select: none;
+}
+
+/* 加载指示器 */
+.detail-time-loading-indicator {
+  position: fixed;
+  bottom: 20px;
+  left: 50%;
+  transform: translateX(-50%);
+  background-color: rgba(0, 0, 0, 0.7);
+  color: white;
+  padding: 8px 16px;
+  border-radius: 4px;
+  z-index: 1000;
 } 
