@@ -1,8 +1,9 @@
-import React, { useRef, useCallback, useEffect, useMemo, useState } from "react";
+import React, { useRef, useEffect, useMemo } from "react";
 import { Tooltip } from "antd";
 import Slider from "rc-slider";
 import "rc-slider/assets/index.css";
 import { ContestConfig } from "../types/contest";
+import { formatTime } from "../utils/timeUtils";
 import "../styles/Contest.css";
 
 interface ProgressBarProps {
@@ -19,7 +20,6 @@ const ProgressBar: React.FC<ProgressBarProps> = ({
   onTimeChange,
 }) => {
   const initialRenderRef = useRef(true);
-  const [isDragging, setIsDragging] = useState(false);
   
   // 计算相对时间（相对于比赛开始时间的毫秒数）
   const relativeTimeMs = useMemo(() => {
@@ -37,7 +37,7 @@ const ProgressBar: React.FC<ProgressBarProps> = ({
     return Math.floor(timeOffsetMs);
   }, [contestConfig, sliderPosition]);
 
-  // 当相对时间变化时调用回调，但避免初始渲染和拖动过程中触发
+  // 当相对时间变化时调用回调，但避免初始渲染时触发
   useEffect(() => {
     // 首次渲染时不触发onTimeChange，仅记录已完成首次渲染
     if (initialRenderRef.current) {
@@ -45,11 +45,11 @@ const ProgressBar: React.FC<ProgressBarProps> = ({
       return;
     }
     
-    // 只在拖动结束后或点击进度条时才触发回调
-    if (onTimeChange && !isDragging) {
+    // 每次时间变化都触发回调
+    if (onTimeChange) {
       onTimeChange(relativeTimeMs);
     }
-  }, [relativeTimeMs, onTimeChange, isDragging]);
+  }, [relativeTimeMs, onTimeChange]);
 
   // 计算当前比赛时间（相对格式）
   const formattedRelativeTime = useMemo(() => {
@@ -88,48 +88,59 @@ const ProgressBar: React.FC<ProgressBarProps> = ({
 
   // 处理拖动中的值变化
   const handleChange = (newPosition: number | number[]) => {
-    setSliderPosition(Array.isArray(newPosition) ? newPosition[0] : newPosition);
-    setIsDragging(true);
+    const position = Array.isArray(newPosition) ? newPosition[0] : newPosition;
+    setSliderPosition(position);
   };
 
-  // 处理拖动结束
-  const handleAfterChange = (newPosition: number | number[]) => {
-    setIsDragging(false);
-    if (onTimeChange && contestConfig) {
-      const contestDurationSec = (contestConfig.end_time || 0) - (contestConfig.start_time || 0);
-      const contestDurationMs = contestDurationSec * 1000;
-      const finalValue = Array.isArray(newPosition) ? newPosition[0] : newPosition;
-      const finalTimeMs = Math.floor(contestDurationMs * (finalValue / 100));
-      onTimeChange(finalTimeMs);
-    }
+  // 处理拖动结束 - 保持这个函数以便将来需要添加特殊的结束处理逻辑
+  const handleAfterChange = () => {
+    // 可以在这里添加特殊的拖动结束处理逻辑
   };
   
-  // 处理拖动开始
-  const handleBeforeChange = () => {
-    setIsDragging(true);
-    document.body.classList.add('dragging-active');
-  };
-
   return (
     <>
-      {/* 使用rc-slider替换自定义进度条 */}
-      <div className="detail-progress-bar-container">
+      {/* 时间信息 */}
+      <div className="detail-time-info">
+        <div>开始时间: {formatTime(contestConfig.start_time)}</div>
+        <div>
+          <span className="detail-custom-status">
+            <span className="detail-status-dot"></span>
+            <span className="detail-status-text">FINISHED</span>
+          </span>
+        </div>
+        <div>结束时间: {formatTime(contestConfig.end_time)}</div>
+      </div>
+
+      {/* 使用rc-slider默认样式 */}
+      <div>
         <Slider
           value={sliderPosition}
           min={0}
           max={100}
           step={0.01}
           onChange={handleChange}
-          onBeforeChange={handleBeforeChange}
-          onAfterChange={handleAfterChange}
-          trackStyle={{ backgroundColor: '#4caf50', height: 10 }}
-          railStyle={{ backgroundColor: '#e0e0e0', height: 10 }}
-          handleStyle={{
-            borderColor: '#2e7d32',
-            height: 20,
-            width: 20,
-            marginTop: -5,
-            backgroundColor: '#2e7d32',
+          onChangeComplete={handleAfterChange}
+          styles={{
+            track: {
+              backgroundColor: '#1890ff',
+              height: 12,
+              backgroundImage: 'linear-gradient(45deg, rgba(255, 255, 255, 0.15) 25%, transparent 25%, transparent 50%, rgba(255, 255, 255, 0.15) 50%, rgba(255, 255, 255, 0.15) 75%, transparent 75%, transparent)',
+              backgroundSize: '24px 24px',
+              borderRadius: 0,
+            },
+            rail: {
+              backgroundColor: '#e9e9e9',
+              height: 12,
+              borderRadius: 0,
+            },
+            handle: {
+              width: 4,
+              height: 20,
+              marginTop: -4,
+              backgroundColor: '#1890ff',
+              border: 'none',
+              borderRadius: 0,
+            }
           }}
         />
       </div>

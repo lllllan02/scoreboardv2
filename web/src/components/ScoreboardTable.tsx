@@ -1,5 +1,5 @@
 import React from "react";
-import { Table, Spin } from "antd";
+import { Table } from "antd";
 import { ContestConfig } from "../types/contest";
 import { Rank } from "../types/rank";
 import useTableColumns from "./TableColumns";
@@ -21,25 +21,18 @@ const ScoreboardTable: React.FC<ScoreboardTableProps> = ({
 
   return (
     <div className="detail-scoreboard">
-      <div style={{ position: 'relative' }}>
-        {loading && (
-          <div className="detail-table-loading-indicator">
-            <Spin size="small" tip="更新数据..." />
-          </div>
-        )}
-        <Table
-          dataSource={rankData?.rows || []}
-          columns={columns}
-          rowKey="team_id"
-          pagination={false}
-          bordered={false}
-          size="small"
-          className="detail-scoreboard-table detail-scoreboard-table-fixed"
-          tableLayout="fixed"
-          scroll={{ x: true }}
-          rowClassName={() => "compact-row"}
-        />
-      </div>
+      <Table
+        dataSource={rankData?.rows || []}
+        columns={columns}
+        rowKey="team_id"
+        pagination={false}
+        bordered={false}
+        size="small"
+        className="detail-scoreboard-table detail-scoreboard-table-fixed"
+        tableLayout="fixed"
+        scroll={{ x: true }}
+        rowClassName={() => "compact-row"}
+      />
     </div>
   );
 };

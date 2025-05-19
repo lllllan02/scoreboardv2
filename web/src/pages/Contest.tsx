@@ -33,8 +33,9 @@ const Contest: React.FC = () => {
     try {
       if (isInitialLoad) {
         setInitialLoading(true);
-      } else if (!isInitialLoad) {
-        setLoading(true);
+      } else {
+        // 只有在初始加载时才显示加载状态
+        setLoading(false);
       }
       
       // 获取排行榜数据，传递相对时间（毫秒）
@@ -114,8 +115,8 @@ const Contest: React.FC = () => {
     
     // 检查是否初始加载已完成再更新数据
     if (initialLoadCompleted.current) {
-      // 直接获取新的排行榜数据
-      fetchRankData(newRelativeTimeMs);
+      // 直接获取新的排行榜数据，不设置 loading 状态
+      fetchRankData(newRelativeTimeMs, false);
       
       // 同时更新配置数据（以获取可能的时间点特定配置）
       fetchConfigData(newRelativeTimeMs);

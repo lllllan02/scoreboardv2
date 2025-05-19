@@ -2,7 +2,6 @@ import React, { useState } from "react";
 import { Link } from "react-router-dom";
 import { HomeOutlined } from "@ant-design/icons";
 import { ContestConfig } from "../types/contest";
-import { formatTime } from "../utils/timeUtils";
 import "../styles/Contest.css";
 
 interface ContestHeaderProps {
@@ -57,18 +56,6 @@ const ContestHeader: React.FC<ContestHeaderProps> = ({ contestConfig }) => {
 
       {/* 标题 */}
       <h1 className="detail-contest-title">{contestConfig.contest_name}</h1>
-
-      {/* 时间信息 */}
-      <div className="detail-time-info">
-        <div>开始时间: {formatTime(contestConfig.start_time)}</div>
-        <div>
-          <span className="detail-custom-status">
-            <span className="detail-status-dot"></span>
-            <span className="detail-status-text">FINISHED</span>
-          </span>
-        </div>
-        <div>结束时间: {formatTime(contestConfig.end_time)}</div>
-      </div>
     </>
   );
 };

@@ -97,15 +97,15 @@
 }
 
 .detail-first-to-solve {
-  background-color: #3DB03D;
+  background-color: #3db03d;
 }
 
 .detail-solved {
-  background-color: #E1FFB5;
+  background-color: #e1ffb5;
 }
 
 .detail-attempted {
-  background-color: #FFD0D0;
+  background-color: #ffd0d0;
 }
 
 .detail-pending {
@@ -201,18 +201,9 @@ body:not(.dragging-active) .detail-progress-fill {
 
 /* 添加条纹效果 */
 .detail-progress-striped {
-  background-image: linear-gradient(
-    45deg,
-    rgba(255, 255, 255, 0.2) 25%,
-    transparent 25%,
-    transparent 50%,
-    rgba(255, 255, 255, 0.2) 50%,
-    rgba(255, 255, 255, 0.2) 75%,
-    transparent 75%,
-    transparent
-  );
-  background-size: 30px 30px;
-  animation: progress-bar-stripes 2s linear infinite;
+  background-image: none;
+  background-size: auto;
+  animation: none;
 }
 
 @keyframes progress-bar-stripes {
@@ -325,7 +316,7 @@ body.dragging-active {
   width: 10px;
   height: 10px;
   border-radius: 50%;
-  background-color: #E1FFB5;
+  background-color: #e1ffb5;
   box-shadow: 0 0 0 2px rgba(82, 196, 26, 0.2);
 }
 
@@ -339,7 +330,7 @@ body.dragging-active {
   width: 12px;
   height: 12px;
   border-radius: 50%;
-  background-color: #E1FFB5;
+  background-color: #e1ffb5;
   box-shadow: 0 0 0 2px rgba(82, 196, 26, 0.2);
   margin-right: 10px;
   vertical-align: middle;
@@ -386,10 +377,10 @@ body.dragging-active {
 .detail-duration-container {
   display: flex;
   justify-content: space-between;
-  margin-top: 12px;
+  margin-top: 16px;
   align-items: center;
   will-change: contents; /* 优化性能 */
-  transform: translateZ(0); /* 强制GPU加速 */
+  transform: translateZ(0); /* 强制GPU加速 */ 
 }
 
 .detail-content-placeholder {
@@ -604,7 +595,7 @@ body.dragging-active {
 /* 为已解决的问题添加绿色背景 */
 .content-solved {
   color: black;
-  background-color: #E1FFB5;
+  background-color: #e1ffb5;
   width: 100%;
   height: 100%;
   display: flex;
@@ -615,14 +606,14 @@ body.dragging-active {
 
 /* 为首个解决的问题添加深绿色背景 */
 .content-first-to-solve {
-  background-color: #3DB03D;
+  background-color: #3db03d;
   color: #000;
 }
 
 /* 为尝试但未解决的问题添加红色背景 */
 .content-attempted {
   color: black;
-  background-color: #FFD0D0;
+  background-color: #ffd0d0;
   width: 100%;
   height: 100%;
   display: flex;
@@ -686,12 +677,12 @@ body.dragging-active {
   .detail-scoreboard-table {
     font-size: 12px;
   }
-  
+
   .problem-cell {
     padding: 2px;
     min-width: 40px;
   }
-  
+
   .detail-scoreboard {
     min-width: 100%;
     padding: 0 5px;
@@ -728,7 +719,11 @@ body.dragging-active {
 }
 
 /* 修复题目标题的内容样式 */
-.detail-scoreboard-table .ant-table-thead > tr > th.problem-column .ant-table-cell-content {
+.detail-scoreboard-table
+  .ant-table-thead
+  > tr
+  > th.problem-column
+  .ant-table-cell-content {
   width: 100%;
   height: 100%;
   margin: 0;
@@ -875,10 +870,6 @@ body.dragging-active {
 /* 减少表格内部动画 */
 .detail-scoreboard-table .ant-table-tbody > tr {
   transition: none !important;
-}
-
-.detail-scoreboard-table .ant-table-row {
-  background-transition: none !important;
 }
 
 .detail-scoreboard-table * {
@@ -1040,7 +1031,7 @@ body.dragging-active .detail-progress-slider {
 
 /* 增加滑块可点击区域 */
 .detail-slider-handle::before {
-  content: '';
+  content: "";
   position: absolute;
   width: 44px;
   height: 44px;
@@ -1055,47 +1046,11 @@ body.dragging-active .detail-progress-slider {
     width: 28px;
     height: 28px;
   }
-  
+
   .detail-progress-bar {
     height: 18px;
     margin-bottom: 20px;
   }
-}
-
-/* rc-slider样式覆盖 */
-.detail-progress-bar-container {
-  width: 100%;
-  padding: 10px 0;
-}
-
-.detail-progress-bar-container .rc-slider {
-  height: 10px;
-}
-
-.detail-progress-bar-container .rc-slider-rail {
-  height: 10px;
-  background-color: #e0e0e0;
-}
-
-.detail-progress-bar-container .rc-slider-track {
-  height: 10px;
-  background-color: #4caf50;
-}
-
-.detail-progress-bar-container .rc-slider-handle {
-  margin-top: -5px;
-  width: 20px;
-  height: 20px;
-  border-color: #2e7d32;
-  background-color: #2e7d32;
-  opacity: 1;
-}
-
-.detail-progress-bar-container .rc-slider-handle:hover,
-.detail-progress-bar-container .rc-slider-handle:active,
-.detail-progress-bar-container .rc-slider-handle:focus {
-  border-color: #1b5e20;
-  box-shadow: 0 0 0 5px rgba(46, 125, 50, 0.2);
 }
 
 body.dragging-active {
@@ -1114,4 +1069,4 @@ body.dragging-active {
   padding: 8px 16px;
   border-radius: 4px;
   z-index: 1000;
-} 
+}
