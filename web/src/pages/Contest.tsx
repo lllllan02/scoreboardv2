@@ -4,24 +4,28 @@ import { getContestConfig } from "../api/contestApi";
 import { getContestRank } from "../api/rankApi";
 import { ContestConfig } from "../types/contest";
 import { Rank } from "../types/rank";
-import { Spin } from "antd";
 import { CloseCircleOutlined } from "@ant-design/icons";
 import "../styles/Contest.css";
 import ContestHeader from "../components/ContestHeader";
 import ProgressBar from "../components/ProgressBar";
 import ScoreboardTable from "../components/ScoreboardTable";
+import GroupFilter from "../components/GroupFilter";
 
 const Contest: React.FC = () => {
   // 状态管理
-  const [initialLoading, setInitialLoading] = useState(true);
-  const [loading, setLoading] = useState(false); // 更新数据时的加载状态
   const [error, setError] = useState<string | null>(null);
-  const [contestConfig, setContestConfig] = useState<ContestConfig | null>(null);
+  const [contestConfig, setContestConfig] = useState<ContestConfig | null>(
+    null
+  );
   const [rankData, setRankData] = useState<Rank | null>(null);
   const [sliderPosition, setSliderPosition] = useState(100); // 滑块位置，百分比
-  const [relativeTimeMs, setRelativeTimeMs] = useState<number | null>(null);
+  const [filteredRankData, setFilteredRankData] = useState<Rank | null>(null);
   const initialLoadCompleted = useRef(false); // 跟踪初始加载是否已完成
-  
+
+  const [selectedGroup, setSelectedGroup] = useState("all");
+  const [relativeTimeMs, setRelativeTimeMs] = useState<number | null>(null);
+  // const [selectedAction, setSelectedAction] = useState("rank");
+
   // 使用 useLocation 获取完整路径
   const location = useLocation();
 
@@ -29,40 +33,45 @@ const Contest: React.FC = () => {
   const apiPath = location.pathname;
 
   // 获取排行榜数据
-  const fetchRankData = useCallback(async (relativeTimeMilliseconds?: number, isInitialLoad = false) => {
-    try {
-      if (isInitialLoad) {
-        setInitialLoading(true);
-      } else {
-        // 只有在初始加载时才显示加载状态
-        setLoading(false);
+  const fetchRankData = useCallback(
+    async (selectedGroup?: string, relativeTimeMs?: number) => {
+      try {
+        // 获取排行榜数据，传递相对时间（毫秒）和分组
+        const rank = await getContestRank(
+          apiPath,
+          relativeTimeMs ?? undefined,
+          selectedGroup
+        );
+        setRankData(rank);
+        setFilteredRankData(rank); // 由于后端已经过滤，直接使用返回的数据
+      } catch (err) {
+        console.error("获取排行榜数据失败:", err);
+        setError("获取排行榜数据失败");
+      } finally {
       }
-      
-      // 获取排行榜数据，传递相对时间（毫秒）
-      const rank = await getContestRank(apiPath, relativeTimeMilliseconds);
-      setRankData(rank);
-    } catch (err) {
-      console.error("获取排行榜数据失败:", err);
-      setError("获取排行榜数据失败");
-    } finally {
-      setInitialLoading(false);
-      setLoading(false);
-    }
-  }, [apiPath]);
+    },
+    [apiPath, selectedGroup] // 添加 selectedGroup 作为依赖
+  );
 
   // 获取配置数据（也传递时间参数）
-  const fetchConfigData = useCallback(async (relativeTimeMilliseconds?: number) => {
-    try {
-      // 获取比赛配置，传递相对时间
-      const config = await getContestConfig(apiPath, relativeTimeMilliseconds);
-      setContestConfig(config);
-      return config;
-    } catch (err) {
-      console.error("获取比赛配置失败:", err);
-      setError("获取比赛配置失败");
-      return null;
-    }
-  }, [apiPath]);
+  const fetchConfigData = useCallback(
+    async (relativeTimeMilliseconds?: number) => {
+      try {
+        // 获取比赛配置，传递相对时间
+        const config = await getContestConfig(
+          apiPath,
+          relativeTimeMilliseconds
+        );
+        setContestConfig(config);
+        return config;
+      } catch (err) {
+        console.error("获取比赛配置失败:", err);
+        setError("获取比赛配置失败");
+        return null;
+      }
+    },
+    [apiPath]
+  );
 
   // 初始加载配置和数据 - 仅执行一次
   useEffect(() => {
@@ -71,22 +80,22 @@ const Contest: React.FC = () => {
       const fetchData = async () => {
         try {
           console.log("执行初始数据加载...");
-          setInitialLoading(true);
           setError(null);
 
           // 首先获取初始配置（不带时间参数）
           const config = await fetchConfigData();
-          
+
           if (config) {
             // 如果配置加载成功，计算比赛结束时的相对时间（毫秒）
-            const contestDurationSec = (config.end_time || 0) - (config.start_time || 0);
+            const contestDurationSec =
+              (config.end_time || 0) - (config.start_time || 0);
             const endTimeMs = contestDurationSec * 1000;
-            
+
             // 设置初始时间为比赛结束时间（100%）
             setRelativeTimeMs(endTimeMs);
-            
+
             // 获取比赛结束时的排行榜数据
-            await fetchRankData(endTimeMs, true);
+            await fetchRankData(selectedGroup, endTimeMs);
           }
 
           // 标记初始加载已完成
@@ -95,7 +104,6 @@ const Contest: React.FC = () => {
           console.error("获取数据失败:", err);
           setError("获取数据失败，请检查路径是否正确");
         } finally {
-          setInitialLoading(false);
         }
       };
 
@@ -104,32 +112,65 @@ const Contest: React.FC = () => {
   }, [apiPath, fetchRankData, fetchConfigData]);
 
   // 处理相对时间变化 - 但避免初始加载时重复触发
-  const handleTimeChange = useCallback((newRelativeTimeMs: number) => {
-    // 避免与初始值相同时重复触发
-    if (relativeTimeMs === newRelativeTimeMs) {
-      return;
-    }
-    
-    console.log("时间变化，更新数据:", newRelativeTimeMs);
-    setRelativeTimeMs(newRelativeTimeMs);
-    
-    // 检查是否初始加载已完成再更新数据
-    if (initialLoadCompleted.current) {
-      // 直接获取新的排行榜数据，不设置 loading 状态
-      fetchRankData(newRelativeTimeMs, false);
-      
-      // 同时更新配置数据（以获取可能的时间点特定配置）
-      fetchConfigData(newRelativeTimeMs);
-    }
-  }, [fetchRankData, fetchConfigData, relativeTimeMs]);
+  const handleTimeChange = useCallback(
+    (newRelativeTimeMs: number) => {
+      // 避免与初始值相同时重复触发
+      if (relativeTimeMs === newRelativeTimeMs) {
+        return;
+      }
 
-  if (initialLoading && !rankData) {
-    return (
-      <div className="detail-loading-spinner">
-        <Spin size="large" tip="加载中..." />
-      </div>
-    );
-  }
+      console.log("时间变化，更新数据:", newRelativeTimeMs);
+      setRelativeTimeMs(newRelativeTimeMs);
+
+      // 检查是否初始加载已完成再更新数据
+      if (initialLoadCompleted.current) {
+        // 直接获取新的排行榜数据，不设置 loading 状态
+        fetchRankData(selectedGroup, newRelativeTimeMs);
+      }
+    },
+    [fetchRankData, relativeTimeMs]
+  );
+
+  // 处理分组和动作变化
+  const handleGroupChange = useCallback(
+    (values: { group: string; action: string }) => {
+      console.log("handleGroupChange called with:", values);
+      setSelectedGroup(values.group);
+      // setSelectedAction(values.action);
+
+      // 根据选择的动作执行不同的操作
+      switch (values.action) {
+        case "rank":
+          // 重新获取数据，让后端处理分组
+          if (relativeTimeMs !== null) {
+            console.log("Fetching rank data with:", values.group, relativeTimeMs);
+            fetchRankData(values.group, relativeTimeMs);
+          } else {
+            console.log("relativeTimeMs is null");
+          }
+          break;
+        case "scroll":
+          // TODO: 处理滚榜逻辑
+          console.log("滚榜功能待实现");
+          break;
+        case "export":
+          // TODO: 处理导出逻辑
+          console.log("导出功能待实现");
+          break;
+        case "stats":
+          // TODO: 处理统计逻辑
+          console.log("统计功能待实现");
+          break;
+        case "submit":
+          // TODO: 处理提交逻辑
+          console.log("提交功能待实现");
+          break;
+        default:
+          break;
+      }
+    },
+    [fetchRankData, relativeTimeMs] // 添加依赖
+  );
 
   if (error && !rankData) {
     return (
@@ -155,19 +196,21 @@ const Contest: React.FC = () => {
 
       {/* 进度条和时间信息区域，使用统一容器 */}
       <div className="detail-time-container">
-        <ProgressBar 
-          contestConfig={contestConfig} 
+        <ProgressBar
+          contestConfig={contestConfig}
           sliderPosition={sliderPosition}
           setSliderPosition={setSliderPosition}
           onTimeChange={handleTimeChange}
         />
       </div>
 
-      {/* 榜单内容 */}
-      <ScoreboardTable 
-        contestConfig={contestConfig} 
-        rankData={rankData} 
-        loading={loading}
+      {/* 添加分组筛选器 */}
+      <GroupFilter contestConfig={contestConfig} onChange={handleGroupChange} />
+
+      {/* 使用过滤后的榜单数据 */}
+      <ScoreboardTable
+        contestConfig={contestConfig}
+        rankData={filteredRankData || rankData}
       />
     </div>
   );

@@ -14,7 +14,6 @@ interface ScoreboardTableProps {
 const ScoreboardTable: React.FC<ScoreboardTableProps> = ({
   contestConfig,
   rankData,
-  loading = false,
 }) => {
   // 获取表格列配置
   const columns = useTableColumns({ contestConfig, rankData });

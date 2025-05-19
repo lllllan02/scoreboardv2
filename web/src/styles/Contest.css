@@ -1070,3 +1070,79 @@ body.dragging-active {
   border-radius: 4px;
   z-index: 1000;
 }
+
+.group-filter-container {
+  padding: 0 20px;
+  margin: 16px 0;
+  text-align: center;
+}
+
+.group-filter-container .ant-radio-group {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 8px;
+}
+
+.group-filter-container .ant-radio-button-wrapper {
+  margin: 0;
+  border-radius: 4px !important;
+}
+
+.group-filter-container .ant-radio-button-wrapper:not(:first-child)::before {
+  display: none;
+}
+
+/* 筛选器容器样式 */
+.filter-container {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 8px 0;
+  margin: 16px 0;
+  width: 100%;
+}
+
+/* 按钮组通用样式 */
+.button-group .ant-radio-group {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+}
+
+.button-group .ant-radio-button-wrapper {
+  border-radius: 4px !important;
+  margin: 0;
+  padding: 0 12px;
+  height: 28px;
+  line-height: 26px;
+  font-size: 13px;
+  border: 1px solid #d9d9d9;
+}
+
+.button-group .ant-radio-button-wrapper:not(:first-child)::before {
+  display: none;
+}
+
+.button-group .ant-radio-button-wrapper-checked {
+  background: #1890ff;
+  border-color: #1890ff;
+  color: #fff;
+}
+
+/* 响应式布局样式 */
+@media (max-width: 768px) {
+  .filter-container {
+    flex-direction: column;
+    gap: 12px;
+    padding: 12px 0;
+  }
+  
+  .button-group {
+    width: 100%;
+  }
+  
+  .button-group .ant-radio-group {
+    justify-content: center;
+  }
+}

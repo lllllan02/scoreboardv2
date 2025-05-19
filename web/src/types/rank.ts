@@ -21,6 +21,7 @@ export interface Row {
   penalty: number;       // 罚时
   dirty: number;         // 错误率
   problems: Problem[];   // 题目列表
+  group?: string;        // 队伍所属分组
 }
 
 // 题目数据
