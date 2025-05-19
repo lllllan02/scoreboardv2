@@ -1,50 +1,69 @@
+/**
+ * ProgressBar 组件 - 比赛进度条
+ * 用于展示和控制比赛进度，包括时间显示、进度控制和图例说明
+ * 支持拖动进度条来查看比赛不同时间点的状态
+ */
+
 import React, { useRef, useEffect, useMemo } from "react";
 import { Tooltip } from "antd";
 import Slider from "rc-slider";
 import "rc-slider/assets/index.css";
 import { ContestConfig } from "../types/contest";
-import { formatTime } from "../utils/timeUtils";
+import {
+  formatTime,
+  formatRelativeTime,
+  formatContestRemainingTime,
+  calculateRelativeTimeMs,
+} from "../utils/timeUtils";
 import "../styles/Contest.css";
 
+/**
+ * 组件属性接口定义
+ * @interface ProgressBarProps
+ * @property {ContestConfig} contestConfig - 比赛配置信息
+ * @property {Function} [onTimeChange] - 时间变化时的回调函数
+ */
 interface ProgressBarProps {
   contestConfig: ContestConfig;
-  sliderPosition: number;
-  setSliderPosition: React.Dispatch<React.SetStateAction<number>>;
   onTimeChange?: (relativeTimeMs: number) => void;
 }
 
+/**
+ * ProgressBar 组件实现
+ * @param {ProgressBarProps} props - 组件属性
+ */
 const ProgressBar: React.FC<ProgressBarProps> = ({
   contestConfig,
-  sliderPosition,
-  setSliderPosition,
   onTimeChange,
 }) => {
+  // 用于标记是否是首次渲染的引用
   const initialRenderRef = useRef(true);
-  
-  // 计算相对时间（相对于比赛开始时间的毫秒数）
-  const relativeTimeMs = useMemo(() => {
-    if (!contestConfig) return 0;
-    
-    // 计算比赛总时长（秒）
-    const contestDurationSec = (contestConfig.end_time || 0) - (contestConfig.start_time || 0);
-    // 转为毫秒
-    const contestDurationMs = contestDurationSec * 1000;
-    
-    // 根据滑块位置计算相对时间（毫秒）
-    const timeOffsetMs = contestDurationMs * (sliderPosition / 100);
-    
-    // 返回相对时间（毫秒），向下取整
-    return Math.floor(timeOffsetMs);
-  }, [contestConfig, sliderPosition]);
 
-  // 当相对时间变化时调用回调，但避免初始渲染时触发
+  // 滑块位置
+  const [sliderPosition, setSliderPosition] = React.useState(100);
+
+  // 计算相对时间（相对于比赛开始时间的毫秒数）
+  const relativeTimeMs = useMemo(
+    () =>
+      calculateRelativeTimeMs(
+        contestConfig?.start_time,
+        contestConfig?.end_time,
+        sliderPosition
+      ),
+    [contestConfig, sliderPosition]
+  );
+
+  /**
+   * 监听相对时间变化，触发回调
+   * 使用 useEffect 避免初始渲染时触发回调
+   */
   useEffect(() => {
     // 首次渲染时不触发onTimeChange，仅记录已完成首次渲染
     if (initialRenderRef.current) {
       initialRenderRef.current = false;
       return;
     }
-    
+
     // 每次时间变化都触发回调
     if (onTimeChange) {
       onTimeChange(relativeTimeMs);
@@ -52,54 +71,42 @@ const ProgressBar: React.FC<ProgressBarProps> = ({
   }, [relativeTimeMs, onTimeChange]);
 
   // 计算当前比赛时间（相对格式）
-  const formattedRelativeTime = useMemo(() => {
-    // 将毫秒转换为秒
-    const relativeTimeSec = Math.floor(relativeTimeMs / 1000);
-    
-    // 将秒数转换为时:分:秒格式
-    const hours = Math.floor(relativeTimeSec / 3600);
-    const minutes = Math.floor((relativeTimeSec % 3600) / 60);
-    const seconds = relativeTimeSec % 60;
-    
-    return `${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
-  }, [relativeTimeMs]);
+  const formattedRelativeTime = useMemo(
+    () => formatRelativeTime(relativeTimeMs),
+    [relativeTimeMs]
+  );
 
   // 计算剩余时间
   const remainingTime = useMemo(() => {
     if (!contestConfig) return "00:00:00";
-    
-    // 计算比赛总时长（秒）并转为毫秒
-    const contestDurationMs = ((contestConfig.end_time || 0) - (contestConfig.start_time || 0)) * 1000;
-    
-    // 计算剩余时间（毫秒）
-    const remainingMs = contestDurationMs - relativeTimeMs;
-    if (remainingMs <= 0) return "00:00:00";
-    
-    // 转换为秒
-    const remainingSec = Math.floor(remainingMs / 1000);
-    
-    // 将剩余秒数转换为时:分:秒格式
-    const hours = Math.floor(remainingSec / 3600);
-    const minutes = Math.floor((remainingSec % 3600) / 60);
-    const seconds = remainingSec % 60;
-    
-    return `${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+
+    // 计算比赛总时长（毫秒）
+    const contestDurationMs =
+      ((contestConfig.end_time || 0) - (contestConfig.start_time || 0)) * 1000;
+
+    return formatContestRemainingTime(contestDurationMs, relativeTimeMs);
   }, [contestConfig, relativeTimeMs]);
 
-  // 处理拖动中的值变化
+  /**
+   * 处理滑块值变化
+   * @param {number | number[]} newPosition - 新的滑块位置
+   */
   const handleChange = (newPosition: number | number[]) => {
     const position = Array.isArray(newPosition) ? newPosition[0] : newPosition;
     setSliderPosition(position);
   };
 
-  // 处理拖动结束 - 保持这个函数以便将来需要添加特殊的结束处理逻辑
+  /**
+   * 处理滑块拖动结束
+   * 预留函数以便将来需要添加特殊的结束处理逻辑
+   */
   const handleAfterChange = () => {
     // 可以在这里添加特殊的拖动结束处理逻辑
   };
-  
+
   return (
     <>
-      {/* 时间信息 */}
+      {/* 比赛时间信息显示区域 */}
       <div className="detail-time-info">
         <div>开始时间: {formatTime(contestConfig.start_time)}</div>
         <div>
@@ -111,7 +118,7 @@ const ProgressBar: React.FC<ProgressBarProps> = ({
         <div>结束时间: {formatTime(contestConfig.end_time)}</div>
       </div>
 
-      {/* 使用rc-slider默认样式 */}
+      {/* 进度条控制区域 */}
       <div>
         <Slider
           value={sliderPosition}
@@ -122,14 +129,15 @@ const ProgressBar: React.FC<ProgressBarProps> = ({
           onChangeComplete={handleAfterChange}
           styles={{
             track: {
-              backgroundColor: '#1890ff',
+              backgroundColor: "#1890ff",
               height: 12,
-              backgroundImage: 'linear-gradient(45deg, rgba(255, 255, 255, 0.15) 25%, transparent 25%, transparent 50%, rgba(255, 255, 255, 0.15) 50%, rgba(255, 255, 255, 0.15) 75%, transparent 75%, transparent)',
-              backgroundSize: '24px 24px',
+              backgroundImage:
+                "linear-gradient(45deg, rgba(255, 255, 255, 0.15) 25%, transparent 25%, transparent 50%, rgba(255, 255, 255, 0.15) 50%, rgba(255, 255, 255, 0.15) 75%, transparent 75%, transparent)",
+              backgroundSize: "24px 24px",
               borderRadius: 0,
             },
             rail: {
-              backgroundColor: '#e9e9e9',
+              backgroundColor: "#e9e9e9",
               height: 12,
               borderRadius: 0,
             },
@@ -137,20 +145,19 @@ const ProgressBar: React.FC<ProgressBarProps> = ({
               width: 4,
               height: 20,
               marginTop: -4,
-              backgroundColor: '#1890ff',
-              border: 'none',
+              backgroundColor: "#1890ff",
+              border: "none",
               borderRadius: 0,
-            }
+            },
           }}
         />
       </div>
 
-      {/* 持续时间和图例 */}
+      {/* 比赛时间和图例说明区域 */}
       <div className="detail-duration-container">
-        <div>
-          比赛时间: {formattedRelativeTime}
-        </div>
+        <div>比赛时间: {formattedRelativeTime}</div>
 
+        {/* 奖项和提交状态图例说明 */}
         <div className="detail-problem-legend">
           <Tooltip title="金牌">
             <div className="detail-legend-item detail-gold">Gold</div>

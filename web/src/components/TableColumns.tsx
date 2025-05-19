@@ -1,3 +1,9 @@
+/**
+ * TableColumns 自定义Hook - 排行榜表格列配置
+ * 用于生成排行榜表格的列配置，包括基础信息列、题目状态列和统计列
+ * 支持动态配置题目数量和气球颜色
+ */
+
 import type { ColumnsType } from "antd/es/table";
 import { ContestConfig } from "../types/contest";
 import { Row, Rank } from "../types/rank";
@@ -9,19 +15,37 @@ import DirtTitle from "./DirtTitle";
 import DirtCell from "./DirtCell";
 import "../styles/Contest.css";
 
+/**
+ * Hook属性接口定义
+ * @interface TableColumnsProps
+ * @property {ContestConfig} contestConfig - 比赛配置信息
+ * @property {Rank} rankData - 排名数据
+ */
 interface TableColumnsProps {
   contestConfig: ContestConfig;
   rankData: Rank;
 }
 
+/**
+ * 生成表格列配置的自定义Hook
+ * @param {TableColumnsProps} props - Hook属性
+ * @returns {ColumnsType<Row>} 返回antd Table组件的列配置数组
+ */
 const useTableColumns = ({
   contestConfig,
   rankData,
 }: TableColumnsProps): ColumnsType<Row> => {
   if (!contestConfig || !rankData) return [];
 
-  // 基础列
+  // 题目列的固定宽度设置
+  const fixedProblemWidth = 45;
+
+  /**
+   * 基础列配置
+   * 包括排名、学校、队伍名称、解题数和罚时
+   */
   const columns: ColumnsType<Row> = [
+    // 排名列
     {
       title: "Place",
       dataIndex: "place",
@@ -29,6 +53,7 @@ const useTableColumns = ({
       width: 55,
       className: "place-column",
     },
+    // 学校列
     {
       title: "School",
       dataIndex: "organization",
@@ -38,18 +63,21 @@ const useTableColumns = ({
         <SchoolCell text={text} orgPlace={record.org_place} />
       ),
     },
+    // 队伍名称列
     {
       title: "Team",
       dataIndex: "team",
       key: "team",
       width: 140,
     },
+    // 解题数列
     {
       title: "Solved",
       dataIndex: "solved",
       key: "solved",
       width: 65,
     },
+    // 罚时列
     {
       title: "Penalty",
       dataIndex: "penalty",
@@ -58,23 +86,26 @@ const useTableColumns = ({
     },
   ];
 
-  // 使用精确的固定宽度而不是相对单位
-  const fixedProblemWidth = 45;
-
-  // 添加题目列
+  /**
+   * 动态添加题目列
+   * 根据比赛配置中的题目数量，生成对应数量的题目列
+   * 每列包含题目标识（A-Z）和提交状态
+   */
   if (contestConfig.problem_quantity && contestConfig.problem_id) {
     for (let i = 0; i < contestConfig.problem_quantity; i++) {
       // 使用字母A-Z标识题目
       const problemId = String.fromCharCode(65 + i);
 
-      // 获取气球颜色设置
+      // 配置气球默认颜色
       let backgroundColor = "#1890ff";
       let color = "white";
 
+      // 如果有气球颜色配置，使用配置的颜色
       if (contestConfig.balloon_color && contestConfig.balloon_color[i]) {
         const balloon = contestConfig.balloon_color[i];
         if (balloon.background_color) {
           backgroundColor = balloon.background_color;
+          // 根据背景色自动计算对比度良好的文字颜色
           color = getContrastColor(balloon.background_color);
         }
       }
@@ -101,7 +132,10 @@ const useTableColumns = ({
     }
   }
 
-  // 添加统计列
+  /**
+   * 添加统计列（脏数据列）
+   * 用于显示每个队伍的额外统计信息
+   */
   columns.push({
     title: () => <DirtTitle />,
     key: "dirt",

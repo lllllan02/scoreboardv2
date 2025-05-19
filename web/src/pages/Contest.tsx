@@ -18,7 +18,6 @@ const Contest: React.FC = () => {
     null
   );
   const [rankData, setRankData] = useState<Rank | null>(null);
-  const [sliderPosition, setSliderPosition] = useState(100); // 滑块位置，百分比
   const [filteredRankData, setFilteredRankData] = useState<Rank | null>(null);
   const initialLoadCompleted = useRef(false); // 跟踪初始加载是否已完成
 
@@ -198,8 +197,6 @@ const Contest: React.FC = () => {
       <div className="detail-time-container">
         <ProgressBar
           contestConfig={contestConfig}
-          sliderPosition={sliderPosition}
-          setSliderPosition={setSliderPosition}
           onTimeChange={handleTimeChange}
         />
       </div>

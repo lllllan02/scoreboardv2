@@ -1,3 +1,8 @@
+/**
+ * ScoreboardTable 组件 - 比赛排行榜表格
+ * 负责展示比赛的完整排名数据，包括队伍信息、解题情况和得分等
+ */
+
 import React from "react";
 import { Table } from "antd";
 import { ContestConfig } from "../types/contest";
@@ -5,12 +10,24 @@ import { Rank } from "../types/rank";
 import useTableColumns from "./TableColumns";
 import "../styles/Contest.css";
 
+/**
+ * 组件属性接口定义
+ * @interface ScoreboardTableProps
+ * @property {ContestConfig} contestConfig - 比赛配置信息
+ * @property {Rank} rankData - 排名数据
+ * @property {boolean} [loading] - 可选的加载状态
+ */
 interface ScoreboardTableProps {
   contestConfig: ContestConfig;
   rankData: Rank;
   loading?: boolean;
 }
 
+/**
+ * ScoreboardTable 组件实现
+ * 使用 antd 的 Table 组件展示排行榜数据
+ * @param {ScoreboardTableProps} props - 组件属性
+ */
 const ScoreboardTable: React.FC<ScoreboardTableProps> = ({
   contestConfig,
   rankData,
