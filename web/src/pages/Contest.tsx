@@ -1,5 +1,5 @@
 import React, { useEffect, useState, useCallback, useRef } from "react";
-import { useLocation } from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom";
 import { getContestConfig } from "../api/contestApi";
 import { getContestRank } from "../api/rankApi";
 import { ContestConfig } from "../types/contest";
@@ -21,15 +21,38 @@ const Contest: React.FC = () => {
   const [filteredRankData, setFilteredRankData] = useState<Rank | null>(null);
   const initialLoadCompleted = useRef(false); // 跟踪初始加载是否已完成
 
-  const [selectedGroup, setSelectedGroup] = useState("all");
-  const [relativeTimeMs, setRelativeTimeMs] = useState<number | null>(null);
-  // const [selectedAction, setSelectedAction] = useState("rank");
-
-  // 使用 useLocation 获取完整路径
+  // 使用 useLocation 和 useNavigate 获取和更新 URL
   const location = useLocation();
+  const navigate = useNavigate();
 
-  // 获取有效路径
+  // 从 URL 参数中获取初始值
+  const searchParams = new URLSearchParams(location.search);
+  const [selectedGroup, setSelectedGroup] = useState(searchParams.get("group") || "all");
+  const [selectedAction, setSelectedAction] = useState(searchParams.get("action") || "rank");
+  const [relativeTimeMs, setRelativeTimeMs] = useState<number | null>(
+    searchParams.get("t") ? parseInt(searchParams.get("t")!) : null
+  );
+
+  // 获取有效路径（移除查询参数）
   const apiPath = location.pathname;
+
+  // 更新 URL 参数的函数
+  const updateUrlParams = useCallback((group: string, action: string, time?: number) => {
+    const params = new URLSearchParams();
+    if (group && group !== "all") {
+      params.set("group", group);
+    }
+    if (action && action !== "rank") {
+      params.set("action", action);
+    }
+    if (time) {
+      params.set("t", time.toString());
+    }
+    
+    // 构建新的 URL，保持路径不变，只更新参数
+    const newUrl = `${location.pathname}${params.toString() ? `?${params.toString()}` : ""}`;
+    navigate(newUrl, { replace: true });
+  }, [location.pathname, navigate]);
 
   // 获取排行榜数据
   const fetchRankData = useCallback(
@@ -49,7 +72,7 @@ const Contest: React.FC = () => {
       } finally {
       }
     },
-    [apiPath, selectedGroup] // 添加 selectedGroup 作为依赖
+    [apiPath]
   );
 
   // 获取配置数据（也传递时间参数）
@@ -85,16 +108,24 @@ const Contest: React.FC = () => {
           const config = await fetchConfigData();
 
           if (config) {
-            // 如果配置加载成功，计算比赛结束时的相对时间（毫秒）
-            const contestDurationSec =
-              (config.end_time || 0) - (config.start_time || 0);
-            const endTimeMs = contestDurationSec * 1000;
+            // 如果 URL 中没有时间参数，使用比赛结束时间
+            if (!searchParams.get("t")) {
+              // 如果配置加载成功，计算比赛结束时的相对时间（毫秒）
+              const contestDurationSec =
+                (config.end_time || 0) - (config.start_time || 0);
+              const endTimeMs = contestDurationSec * 1000;
 
-            // 设置初始时间为比赛结束时间（100%）
-            setRelativeTimeMs(endTimeMs);
+              // 设置初始时间为比赛结束时间（100%）
+              setRelativeTimeMs(endTimeMs);
+              updateUrlParams(selectedGroup, selectedAction, endTimeMs);
 
-            // 获取比赛结束时的排行榜数据
-            await fetchRankData(selectedGroup, endTimeMs);
+              // 获取比赛结束时的排行榜数据
+              await fetchRankData(selectedGroup, endTimeMs);
+            } else {
+              // 使用 URL 中的时间参数
+              const timeMs = parseInt(searchParams.get("t")!);
+              await fetchRankData(selectedGroup, timeMs);
+            }
           }
 
           // 标记初始加载已完成
@@ -108,7 +139,7 @@ const Contest: React.FC = () => {
 
       fetchData();
     }
-  }, [apiPath, fetchRankData, fetchConfigData]);
+  }, [apiPath, fetchRankData, fetchConfigData, searchParams, selectedGroup, selectedAction, updateUrlParams]);
 
   // 处理相对时间变化 - 但避免初始加载时重复触发
   const handleTimeChange = useCallback(
@@ -120,6 +151,9 @@ const Contest: React.FC = () => {
 
       console.log("时间变化，更新数据:", newRelativeTimeMs);
       setRelativeTimeMs(newRelativeTimeMs);
+      
+      // 更新 URL 参数
+      updateUrlParams(selectedGroup, selectedAction, newRelativeTimeMs);
 
       // 检查是否初始加载已完成再更新数据
       if (initialLoadCompleted.current) {
@@ -127,7 +161,7 @@ const Contest: React.FC = () => {
         fetchRankData(selectedGroup, newRelativeTimeMs);
       }
     },
-    [fetchRankData, relativeTimeMs]
+    [fetchRankData, relativeTimeMs, selectedGroup, selectedAction, updateUrlParams]
   );
 
   // 处理分组和动作变化
@@ -135,7 +169,10 @@ const Contest: React.FC = () => {
     (values: { group: string; action: string }) => {
       console.log("handleGroupChange called with:", values);
       setSelectedGroup(values.group);
-      // setSelectedAction(values.action);
+      setSelectedAction(values.action);
+      
+      // 更新 URL 参数
+      updateUrlParams(values.group, values.action, relativeTimeMs ?? undefined);
 
       // 根据选择的动作执行不同的操作
       switch (values.action) {
@@ -168,7 +205,7 @@ const Contest: React.FC = () => {
           break;
       }
     },
-    [fetchRankData, relativeTimeMs] // 添加依赖
+    [fetchRankData, relativeTimeMs, updateUrlParams]
   );
 
   if (error && !rankData) {
@@ -202,7 +239,12 @@ const Contest: React.FC = () => {
       </div>
 
       {/* 添加分组筛选器 */}
-      <GroupFilter contestConfig={contestConfig} onChange={handleGroupChange} />
+      <GroupFilter 
+        contestConfig={contestConfig} 
+        onChange={handleGroupChange}
+        initialGroup={selectedGroup}
+        initialAction={selectedAction}
+      />
 
       {/* 使用过滤后的榜单数据 */}
       <ScoreboardTable

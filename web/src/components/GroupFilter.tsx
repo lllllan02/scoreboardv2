@@ -35,10 +35,14 @@ const sortGroups = (entries: [string, string][]) => {
  * @interface GroupFilterProps
  * @property {ContestConfig} contestConfig - 比赛配置信息
  * @property {Function} onChange - 选择变更时的回调函数，接收组别和操作类型
+ * @property {string} initialGroup - 初始选中的组别
+ * @property {string} initialAction - 初始选中的操作类型
  */
 interface GroupFilterProps {
   contestConfig: ContestConfig;
   onChange: (values: { group: string; action: string }) => void;
+  initialGroup?: string;
+  initialAction?: string;
 }
 
 /**
@@ -48,12 +52,14 @@ interface GroupFilterProps {
 const GroupFilter: React.FC<GroupFilterProps> = ({
   contestConfig,
   onChange,
+  initialGroup = 'all',
+  initialAction = 'rank',
 }) => {
-  // 当前选中的组别，默认为 'all'
-  const [selectedGroup, setSelectedGroup] = useState('all');
+  // 当前选中的组别，使用传入的 initialGroup
+  const [selectedGroup, setSelectedGroup] = useState(initialGroup);
   
-  // 当前选中的操作类型，默认为 'rank'
-  const [selectedAction, setSelectedAction] = useState('rank');
+  // 当前选中的操作类型，使用传入的 initialAction
+  const [selectedAction, setSelectedAction] = useState(initialAction);
 
   /**
    * 处理组别选择变更
