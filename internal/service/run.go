@@ -128,6 +128,11 @@ func GetContestRun(path string, query ContestRunQuery) (result *ContestRun, err 
 		})
 	}
 
+	// 时间倒序
+	sort.Slice(result.Data, func(i, j int) bool {
+		return result.Data[i].Timestamp > result.Data[j].Timestamp
+	})
+
 	// 分页
 	result.Total = len(result.Data)
 	start, end := paginate.Paginate(query.Page, query.PageSize, result.Total)

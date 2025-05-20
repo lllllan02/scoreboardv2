@@ -2,14 +2,17 @@ import React, { useEffect, useState, useCallback, useRef } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import { getContestConfig } from "../api/contestApi";
 import { getContestRank } from "../api/rankApi";
+import { getContestSubmissions } from "../api/contestApi";
 import { ContestConfig } from "../types/contest";
 import { Rank } from "../types/rank";
+import { Submission } from "../types/submission";
 import { CloseCircleOutlined } from "@ant-design/icons";
 import "../styles/Contest.css";
 import ContestHeader from "../components/ContestHeader";
 import ProgressBar from "../components/ProgressBar";
 import ScoreboardTable from "../components/ScoreboardTable";
 import GroupFilter from "../components/GroupFilter";
+import SubmissionList from "../components/SubmissionList";
 
 const Contest: React.FC = () => {
   // 状态管理
@@ -95,6 +98,110 @@ const Contest: React.FC = () => {
     [apiPath]
   );
 
+  // 修改提交列表状态
+  const [submissions, setSubmissions] = useState<Submission[]>([]);
+  const [submissionsLoading, setSubmissionsLoading] = useState<boolean>(false);
+  const [submissionTotal, setSubmissionTotal] = useState<number>(0);
+  const [currentPage, setCurrentPage] = useState<number>(1);
+  const [pageSize, setPageSize] = useState<number>(50);
+
+  // 获取提交列表数据
+  const fetchSubmissionData = useCallback(
+    async (selectedGroup?: string, relativeTimeMs?: number, page: number = 1, size: number = 50) => {
+      try {
+        setSubmissionsLoading(true);
+        const response = await getContestSubmissions(
+          apiPath,
+          selectedGroup,
+          relativeTimeMs,
+          page,
+          size
+        );
+        setSubmissions(response.data.data);
+        setSubmissionTotal(response.data.total);
+      } catch (err) {
+        console.error("获取提交列表失败:", err);
+        setError("获取提交列表失败");
+      } finally {
+        setSubmissionsLoading(false);
+      }
+    },
+    [apiPath]
+  );
+
+  // 处理数据获取的通用函数
+  const fetchData = useCallback(
+    (group: string, action: string, time: number | null, page: number = 1) => {
+      if (time === null) {
+        console.log("relativeTimeMs is null");
+        return;
+      }
+
+      console.log(`Fetching ${action} data with:`, { group, time, page });
+      if (action === "submit") {
+        fetchSubmissionData(group, time, page, pageSize);
+      } else if (action === "rank") {
+        fetchRankData(group, time);
+      }
+    },
+    [fetchRankData, fetchSubmissionData, pageSize]
+  );
+
+  // 处理相对时间变化 - 但避免初始加载时重复触发
+  const handleTimeChange = useCallback(
+    (newRelativeTimeMs: number) => {
+      // 避免与初始值相同时重复触发
+      if (relativeTimeMs === newRelativeTimeMs) {
+        return;
+      }
+
+      console.log("时间变化，更新数据:", newRelativeTimeMs);
+      setRelativeTimeMs(newRelativeTimeMs);
+      
+      // 更新 URL 参数
+      updateUrlParams(selectedGroup, selectedAction, newRelativeTimeMs);
+
+      // 检查是否初始加载已完成再更新数据
+      if (initialLoadCompleted.current) {
+        fetchData(selectedGroup, selectedAction, newRelativeTimeMs);
+      }
+    },
+    [fetchData, relativeTimeMs, selectedGroup, selectedAction, updateUrlParams]
+  );
+
+  // 处理分组和动作变化
+  const handleGroupChange = useCallback(
+    (values: { group: string; action: string }) => {
+      console.log("handleGroupChange called with:", values);
+      setSelectedGroup(values.group);
+      setSelectedAction(values.action);
+      
+      // 更新 URL 参数
+      updateUrlParams(values.group, values.action, relativeTimeMs ?? undefined);
+
+      // 如果是提交列表，重置分页状态
+      if (values.action === "submit") {
+        setCurrentPage(1);
+      }
+
+      // 只有 rank 和 submit 需要获取数据
+      if (["rank", "submit"].includes(values.action)) {
+        fetchData(values.group, values.action, relativeTimeMs, 1);
+      }
+    },
+    [fetchData, relativeTimeMs, updateUrlParams]
+  );
+
+  // 处理分页变化
+  const handleSubmissionPageChange = useCallback(
+    (page: number, size: number) => {
+      setCurrentPage(page);
+      setPageSize(size);
+      fetchData(selectedGroup, "submit", relativeTimeMs, page);
+    },
+    [selectedGroup, relativeTimeMs, fetchData]
+  );
+
   // 初始加载配置和数据 - 仅执行一次
   useEffect(() => {
     // 确保只在初次渲染时执行一次
@@ -119,12 +226,20 @@ const Contest: React.FC = () => {
               setRelativeTimeMs(endTimeMs);
               updateUrlParams(selectedGroup, selectedAction, endTimeMs);
 
-              // 获取比赛结束时的排行榜数据
-              await fetchRankData(selectedGroup, endTimeMs);
+              // 根据当前的 action 获取对应数据
+              if (selectedAction === "submit") {
+                await fetchSubmissionData(selectedGroup, endTimeMs, 1, pageSize);
+              } else {
+                await fetchRankData(selectedGroup, endTimeMs);
+              }
             } else {
               // 使用 URL 中的时间参数
               const timeMs = parseInt(searchParams.get("t")!);
-              await fetchRankData(selectedGroup, timeMs);
+              if (selectedAction === "submit") {
+                await fetchSubmissionData(selectedGroup, timeMs, 1, pageSize);
+              } else {
+                await fetchRankData(selectedGroup, timeMs);
+              }
             }
           }
 
@@ -139,76 +254,9 @@ const Contest: React.FC = () => {
 
       fetchData();
     }
-  }, [apiPath, fetchRankData, fetchConfigData, searchParams, selectedGroup, selectedAction, updateUrlParams]);
+  }, [apiPath, fetchRankData, fetchConfigData, searchParams, selectedGroup, selectedAction, updateUrlParams, fetchSubmissionData, pageSize]);
 
-  // 处理相对时间变化 - 但避免初始加载时重复触发
-  const handleTimeChange = useCallback(
-    (newRelativeTimeMs: number) => {
-      // 避免与初始值相同时重复触发
-      if (relativeTimeMs === newRelativeTimeMs) {
-        return;
-      }
-
-      console.log("时间变化，更新数据:", newRelativeTimeMs);
-      setRelativeTimeMs(newRelativeTimeMs);
-      
-      // 更新 URL 参数
-      updateUrlParams(selectedGroup, selectedAction, newRelativeTimeMs);
-
-      // 检查是否初始加载已完成再更新数据
-      if (initialLoadCompleted.current) {
-        // 直接获取新的排行榜数据，不设置 loading 状态
-        fetchRankData(selectedGroup, newRelativeTimeMs);
-      }
-    },
-    [fetchRankData, relativeTimeMs, selectedGroup, selectedAction, updateUrlParams]
-  );
-
-  // 处理分组和动作变化
-  const handleGroupChange = useCallback(
-    (values: { group: string; action: string }) => {
-      console.log("handleGroupChange called with:", values);
-      setSelectedGroup(values.group);
-      setSelectedAction(values.action);
-      
-      // 更新 URL 参数
-      updateUrlParams(values.group, values.action, relativeTimeMs ?? undefined);
-
-      // 根据选择的动作执行不同的操作
-      switch (values.action) {
-        case "rank":
-          // 重新获取数据，让后端处理分组
-          if (relativeTimeMs !== null) {
-            console.log("Fetching rank data with:", values.group, relativeTimeMs);
-            fetchRankData(values.group, relativeTimeMs);
-          } else {
-            console.log("relativeTimeMs is null");
-          }
-          break;
-        case "scroll":
-          // TODO: 处理滚榜逻辑
-          console.log("滚榜功能待实现");
-          break;
-        case "export":
-          // TODO: 处理导出逻辑
-          console.log("导出功能待实现");
-          break;
-        case "stats":
-          // TODO: 处理统计逻辑
-          console.log("统计功能待实现");
-          break;
-        case "submit":
-          // TODO: 处理提交逻辑
-          console.log("提交功能待实现");
-          break;
-        default:
-          break;
-      }
-    },
-    [fetchRankData, relativeTimeMs, updateUrlParams]
-  );
-
-  if (error && !rankData) {
+  if (error) {
     return (
       <div className="detail-error-message">
         <CloseCircleOutlined className="detail-error-icon" />
@@ -217,7 +265,7 @@ const Contest: React.FC = () => {
     );
   }
 
-  if (!contestConfig || !rankData) {
+  if (!contestConfig || (selectedAction !== "submit" && !rankData)) {
     return (
       <div className="detail-error-message">
         <CloseCircleOutlined className="detail-error-icon" />
@@ -246,11 +294,22 @@ const Contest: React.FC = () => {
         initialAction={selectedAction}
       />
 
-      {/* 使用过滤后的榜单数据 */}
-      <ScoreboardTable
-        contestConfig={contestConfig}
-        rankData={filteredRankData || rankData}
-      />
+      {selectedAction === "submit" ? (
+        <SubmissionList
+          contestConfig={contestConfig}
+          submissions={submissions}
+          loading={submissionsLoading}
+          total={submissionTotal}
+          currentPage={currentPage}
+          pageSize={pageSize}
+          onPageChange={handleSubmissionPageChange}
+        />
+      ) : (
+        <ScoreboardTable
+          contestConfig={contestConfig}
+          rankData={rankData!}
+        />
+      )}
     </div>
   );
 };

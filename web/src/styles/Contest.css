@@ -1185,3 +1185,48 @@ body.dragging-active {
   font-size: 16px;
   flex-shrink: 0;
 }
+
+/* 提交列表样式 */
+.submission-list {
+  margin-top: 16px;
+  background-color: white;
+  border-radius: 8px;
+  padding: 16px;
+}
+
+/* 提交状态样式 */
+.status-accepted {
+  color: #52c41a;  /* 绿色 */
+}
+
+.status-compilation-error {
+  color: #1890ff;  /* 蓝色 */
+}
+
+.status-memory-limit-exceeded {
+  color: #fa8c16;  /* 橙色 */
+}
+
+.status-presentation-error {
+  color: #1890ff;  /* 蓝色 */
+}
+
+.status-runtime-error {
+  color: #722ed1;  /* 紫色 */
+}
+
+.status-time-limit-exceeded {
+  color: #fa8c16;  /* 橙色 */
+}
+
+.status-wrong-answer {
+  color: #f5222d;  /* 红色 */
+}
+
+.status-pending {
+  color: #1890ff;  /* 蓝色 */
+}
+
+.status-frozen {
+  color: #8c8c8c;  /* 灰色 */
+}
