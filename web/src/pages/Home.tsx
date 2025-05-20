@@ -100,7 +100,9 @@ const HomePage: React.FC = () => {
 
       {loading && visibleContests.length === 0 ? (
         <div className="loading-container">
-          <Spin size="large" tip="Loading..." />
+          <Spin spinning={true} size="large">
+            <div style={{ padding: '50px', textAlign: 'center' }}>Loading...</div>
+          </Spin>
         </div>
       ) : visibleContests.length > 0 ? (
         <InfiniteScroll
@@ -108,19 +110,21 @@ const HomePage: React.FC = () => {
           next={loadMoreData}
           hasMore={hasMore}
           loader={
-            <div className="loading-more-container">
-              <Spin tip="加载更多..." />
+            <div key="loader" className="loading-more-container">
+              <Spin spinning={true}>
+                <div style={{ padding: '20px', textAlign: 'center' }}>加载更多...</div>
+              </Spin>
             </div>
           }
           endMessage={
-            <p className="end-message">
+            <p key="end-message" className="end-message">
               已经到底啦 ~
             </p>
           }
         >
           <Row gutter={[16, 16]}>
-            {visibleContests.map(contest => (
-              <Col xs={24} sm={24} md={24} key={contest.config.contest_id}>
+            {visibleContests.map((contest, index) => (
+              <Col xs={24} sm={24} md={24} key={`${contest.config.contest_id || ''}-${index}`}>
                 <ContestCard contest={contest} />
               </Col>
             ))}

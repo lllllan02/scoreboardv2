@@ -1,5 +1,6 @@
 import axios from "axios";
 import { Rank } from "../types/rank";
+import { TrendPoint } from "../types/trend";
 
 // 请求缓存
 const requestCache = new Map<string, { data: any; timestamp: number }>();
@@ -53,6 +54,23 @@ export const getContestRank = async (
     return data;
   } catch (error) {
     console.error("获取排行榜数据失败:", error);
+    throw error;
+  }
+};
+
+export const getTeamTrend = async (contestPath: string, teamId: string): Promise<TrendPoint[]> => {
+  try {
+    console.log('请求趋势数据:', `/api/team-trend${contestPath}?team_id=${teamId}`);
+    const response = await axios.get(`/api/team-trend${contestPath}?team_id=${teamId}`);
+    console.log('趋势数据响应:', response);
+    
+    // 检查响应数据结构
+    if (response.data && response.data.data) {
+      return response.data.data;
+    }
+    return response.data;
+  } catch (error) {
+    console.error('获取队伍趋势数据失败:', error);
     throw error;
   }
 };
