@@ -56,3 +56,20 @@ func GetContestRank(c *gin.Context) {
 	// 返回数据
 	errors.SendSuccess(c, rank)
 }
+
+// GetTeamTrend 返回队伍排名趋势数据
+func GetTeamTrend(c *gin.Context) {
+	// 获取请求路径
+	path := c.Param("path")
+	teamId := c.Query("team_id")
+
+	// 调用服务层获取数据
+	trend, err := service.GetTeamTrend(path, teamId)
+	if err != nil {
+		errors.SendError(c, err)
+		return
+	}
+
+	// 返回数据
+	errors.SendSuccess(c, trend)
+}
