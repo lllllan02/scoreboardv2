@@ -14,7 +14,7 @@ const App: React.FC = () => {
       <Router>
         <Routes>
           <Route path="/" element={<Home />} />
-          <Route path="/provincial-contest/:year/:province/*" element={<Contest />} />
+          <Route path="/*" element={<Contest />} />
         </Routes>
       </Router>
     </ConfigProvider>
