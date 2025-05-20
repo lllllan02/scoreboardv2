@@ -165,6 +165,23 @@ func GetContestRank(path string, group string, t int) (*Rank, error) {
 		row.Problems[problemIndex].Submitted++         // 提交次数加一
 	}
 
+	// 将没提交过代码的队伍添加到排行榜
+	for _, team := range teamList {
+		if !groupFilter(team, group) {
+			continue
+		}
+
+		if _, ok := rows[string(team.TeamId)]; !ok {
+			rows[string(team.TeamId)] = &Row{
+				TeamId:       string(team.TeamId),
+				Team:         string(team.Name),
+				Organization: string(team.Organization),
+				Girl:         bool(team.Girl),
+				Problems:     make([]Problem, config.ProblemQuantity),
+			}
+		}
+	}
+
 	// 将队伍信息添加到排行榜
 	for _, row := range rows {
 		rank.Rows = append(rank.Rows, row)
