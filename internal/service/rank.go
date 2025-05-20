@@ -219,7 +219,14 @@ func GetContestRank(path string, group string, t int) (*Rank, error) {
 	place := 1
 	orgPlace := make(map[string]int)
 	for i, row := range rank.Rows {
-		row.Place = i + 1
+		// 如果当前队伍和前一个队伍解决题目数和罚时相同，则排名相同
+		if i > 0 &&
+			rank.Rows[i].Solved == rank.Rows[i-1].Solved &&
+			rank.Rows[i].Penalty == rank.Rows[i-1].Penalty {
+			row.Place = rank.Rows[i-1].Place
+		} else {
+			row.Place = i + 1
+		}
 
 		if orgPlace[row.Organization] == 0 {
 			row.OrgPlace, place = place, place+1
