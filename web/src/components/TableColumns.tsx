@@ -114,6 +114,7 @@ const useTableColumns = ({
         title: () => (
           <ProblemTitle
             problemId={problemId}
+            accept={rankData.accepted[i]}
             backgroundColor={backgroundColor}
             color={color}
           />
