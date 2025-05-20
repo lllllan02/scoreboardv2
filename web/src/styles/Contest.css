@@ -1164,3 +1164,24 @@ body.dragging-active {
   height: 0 !important;
   content: none !important;
 }
+
+/* 队伍名称单元格样式 */
+.team-cell {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 4px 8px;
+}
+
+.team-name {
+  flex: 1;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.girl-team-icon {
+  color: #eb2f96;
+  font-size: 16px;
+  flex-shrink: 0;
+}

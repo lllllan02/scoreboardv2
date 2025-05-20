@@ -22,6 +22,7 @@ export interface Row {
   dirty: number;         // 错误率
   problems: Problem[];   // 题目列表
   group?: string;        // 队伍所属分组
+  girl?: boolean;        // 是否为女队
 }
 
 // 题目数据

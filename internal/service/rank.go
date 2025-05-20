@@ -37,6 +37,7 @@ type Row struct {
 	TeamId       string    `json:"team_id"`      // 队伍 id
 	Team         string    `json:"team"`         // 队伍名称
 	Organization string    `json:"organization"` // 队伍组织
+	Girl         bool      `json:"girl"`         // 是否是女队
 	Place        int       `json:"place"`        // 排名
 	OrgPlace     int       `json:"org_place"`    // 组织排名
 	Solved       int       `json:"solved"`       // 解决题目数
@@ -80,6 +81,7 @@ func GetContestRank(path string, group string, t int) (*Rank, error) {
 			TeamId:       teamId,
 			Team:         string(team.Name),
 			Organization: string(team.Organization),
+			Girl:         bool(team.Girl),
 			Problems:     make([]Problem, config.ProblemQuantity),
 		}
 

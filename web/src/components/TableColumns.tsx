@@ -4,11 +4,13 @@
  * 支持动态配置题目数量和气球颜色
  */
 
+import React from "react";
 import type { ColumnsType } from "antd/es/table";
 import { ContestConfig } from "../types/contest";
 import { Row, Rank } from "../types/rank";
 import { getContrastColor } from "../utils/colorUtils";
 import SchoolCell from "./SchoolCell";
+import TeamCell from "./TeamCell";
 import ProblemCell from "./ProblemCell";
 import ProblemTitle from "./ProblemTitle";
 import DirtTitle from "./DirtTitle";
@@ -69,6 +71,9 @@ const useTableColumns = ({
       dataIndex: "team",
       key: "team",
       width: 140,
+      render: (text: string, record: Row) => (
+        <TeamCell teamName={text} isGirlTeam={record.girl} />
+      ),
     },
     // 解题数列
     {
