@@ -57,6 +57,29 @@ func GetContestRank(c *gin.Context) {
 	errors.SendSuccess(c, rank)
 }
 
+// GetContestRun 返回比赛提交数据
+func GetContestRun(c *gin.Context) {
+	// 获取请求路径
+	path := c.Param("path")
+
+	// 获取请求参数
+	var query service.ContestRunQuery
+	if err := c.ShouldBindQuery(&query); err != nil {
+		errors.SendError(c, err)
+		return
+	}
+
+	// 调用服务层获取数据
+	run, err := service.GetContestRun(path, query)
+	if err != nil {
+		errors.SendError(c, err)
+		return
+	}
+
+	// 返回数据
+	errors.SendSuccess(c, run)
+}
+
 // GetTeamTrend 返回队伍排名趋势数据
 func GetTeamTrend(c *gin.Context) {
 	// 获取请求路径
