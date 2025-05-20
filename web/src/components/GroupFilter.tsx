@@ -8,6 +8,28 @@ import { Radio } from "antd";
 import type { RadioChangeEvent } from "antd";
 import { ContestConfig } from "../types/contest";
 
+// 定义组别的显示顺序
+const GROUP_ORDER = ['official', 'unofficial', 'girl', 'undergraduate', 'vocational'];
+
+/**
+ * 根据预定义顺序对组别进行排序
+ * @param entries - 组别键值对数组
+ * @returns 排序后的组别键值对数组
+ */
+const sortGroups = (entries: [string, string][]) => {
+  return entries.sort(([keyA], [keyB]) => {
+    const indexA = GROUP_ORDER.indexOf(keyA);
+    const indexB = GROUP_ORDER.indexOf(keyB);
+    // 如果都不在预定义顺序中，保持原有顺序
+    if (indexA === -1 && indexB === -1) return 0;
+    // 如果只有一个在预定义顺序中，将其排在前面
+    if (indexA === -1) return 1;
+    if (indexB === -1) return -1;
+    // 按预定义顺序排序
+    return indexA - indexB;
+  });
+};
+
 /**
  * 组件属性接口定义
  * @interface GroupFilterProps
@@ -69,7 +91,7 @@ const GroupFilter: React.FC<GroupFilterProps> = ({
           </Radio.Button>
           {/* 根据比赛配置动态渲染组别选项 */}
           {contestConfig.group &&
-            Object.entries(contestConfig.group).map(([key, name]) => (
+            sortGroups(Object.entries(contestConfig.group)).map(([key, name]) => (
               <Radio.Button key={key} value={key}>
                 {name}
               </Radio.Button>
