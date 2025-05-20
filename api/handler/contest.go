@@ -44,9 +44,10 @@ func GetContestRank(c *gin.Context) {
 	// 获取请求路径
 	path := c.Param("path")
 	t := cast.ToInt(c.Query("t"))
+	group := c.Query("group")
 
 	// 调用服务层获取数据
-	rank, err := service.GetContestRank(path, t)
+	rank, err := service.GetContestRank(path, group, t)
 	if err != nil {
 		errors.SendError(c, err)
 		return

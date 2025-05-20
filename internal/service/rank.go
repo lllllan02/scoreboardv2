@@ -1,7 +1,25 @@
 package service
 
 import (
+	"slices"
 	"sort"
+
+	"github.com/lllllan02/scoreboardv2/internal/model"
+)
+
+const (
+	// 所有队伍
+	GroupAll = "all"
+	// 女队
+	GroupGirl = "girl"
+	// 正式队伍
+	GroupOfficial = "official"
+	// 非正式队伍
+	GroupUnofficial = "unofficial"
+	// 本科队伍
+	GroupUndergraduate = "undergraduate"
+	// 高职队伍
+	GroupVocational = "vocational"
 )
 
 type Rank struct {
@@ -39,7 +57,7 @@ type Problem struct {
 	Dirt        int  `json:"dirt"`         // 错误次数(前提是已经解决)
 }
 
-func GetContestRank(path string, t int) (*Rank, error) {
+func GetContestRank(path string, group string, t int) (*Rank, error) {
 	// 获取比赛配置
 	config, err := loadConfig(path)
 	if err != nil {
@@ -53,7 +71,8 @@ func GetContestRank(path string, t int) (*Rank, error) {
 	}
 
 	// 队伍 id 映射
-	rows := make(map[string]*Row) // team_id -> row
+	rows := make(map[string]*Row)        // team_id -> row
+	teams := make(map[string]model.Team) // team_id -> team
 	for _, team := range teamList {
 		teamId := string(team.TeamId)
 
@@ -63,6 +82,8 @@ func GetContestRank(path string, t int) (*Rank, error) {
 			Organization: string(team.Organization),
 			Problems:     make([]Problem, config.ProblemQuantity),
 		}
+
+		teams[teamId] = team
 	}
 
 	// 获取提交记录
@@ -93,13 +114,20 @@ func GetContestRank(path string, t int) (*Rank, error) {
 		problemIndex := run.ProblemId        // 题目索引
 		penalty := run.Timestamp / 1000 / 60 // 罚时
 
+		// 如果队伍不存在，则跳过
+		row, ok := rows[teamId]
+		if !ok {
+			continue
+		}
+
+		// 提交时间大于目标时间，则跳过
 		if run.Timestamp > t {
 			continue
 		}
 
-		// 如果队伍不存在，则跳过
-		row, ok := rows[teamId]
-		if !ok {
+		// 如果筛选组别不符合，则跳过
+		team := teams[teamId]
+		if !groupFilter(team, group) {
 			continue
 		}
 
@@ -184,4 +212,22 @@ func GetContestRank(path string, t int) (*Rank, error) {
 	}
 
 	return rank, nil
+}
+
+// groupFilter 根据组别过滤队伍
+func groupFilter(team model.Team, group string) bool {
+	switch group {
+	case GroupGirl:
+		return bool(team.Girl)
+	case GroupOfficial:
+		return bool(team.Official) || slices.Contains(team.Group, group)
+	case GroupUnofficial:
+		return bool(team.Unofficial) || slices.Contains(team.Group, group)
+	case GroupUndergraduate:
+		return bool(team.Undergraduate) || slices.Contains(team.Group, group)
+	case GroupVocational:
+		return bool(team.Vocational) || slices.Contains(team.Group, group)
+	default:
+		return true
+	}
 }
