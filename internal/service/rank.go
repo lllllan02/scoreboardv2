@@ -76,15 +76,6 @@ func GetContestRank(path string, group string, t int) (*Rank, error) {
 	teams := make(map[string]model.Team) // team_id -> team
 	for _, team := range teamList {
 		teamId := string(team.TeamId)
-
-		rows[teamId] = &Row{
-			TeamId:       teamId,
-			Team:         string(team.Name),
-			Organization: string(team.Organization),
-			Girl:         bool(team.Girl),
-			Problems:     make([]Problem, config.ProblemQuantity),
-		}
-
 		teams[teamId] = team
 	}
 
@@ -116,12 +107,6 @@ func GetContestRank(path string, group string, t int) (*Rank, error) {
 		problemIndex := run.ProblemId        // 题目索引
 		penalty := run.Timestamp / 1000 / 60 // 罚时
 
-		// 如果队伍不存在，则跳过
-		row, ok := rows[teamId]
-		if !ok {
-			continue
-		}
-
 		// 提交时间大于目标时间，则跳过
 		if run.Timestamp > t {
 			continue
@@ -132,6 +117,18 @@ func GetContestRank(path string, group string, t int) (*Rank, error) {
 		if !groupFilter(team, group) {
 			continue
 		}
+
+		// 如果队伍不存在，则跳过
+		if _, ok := rows[teamId]; !ok {
+			rows[teamId] = &Row{
+				TeamId:       teamId,
+				Team:         string(team.Name),
+				Organization: string(team.Organization),
+				Girl:         bool(team.Girl),
+				Problems:     make([]Problem, config.ProblemQuantity),
+			}
+		}
+		row := rows[teamId]
 
 		// 如果题目已经解决，则跳过
 		if row.Problems[problemIndex].Solved {
