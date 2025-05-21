@@ -430,18 +430,36 @@ body.dragging-active {
   width: auto;
   overflow-x: auto;
   max-width: 100%;
-  min-width: 500px; /* 稍微减小最小宽度 */
+  min-width: 500px;
   display: flex;
   justify-content: center;
   position: relative;
 }
 
+/* 加载更多容器样式 */
+.loading-more-container {
+  padding: 10px;
+  text-align: center;
+  width: 100%;
+  background: transparent;
+}
+
+/* 到底提示样式 */
+.end-message {
+  text-align: center;
+  padding: 10px;
+  color: #999;
+  font-size: 14px;
+  background: transparent;
+}
+
+/* 表格样式 */
 .detail-scoreboard-table {
   width: auto;
   table-layout: fixed;
-  margin: 0 auto; /* 表格居中 */
-  box-shadow: none; /* 移除阴影 */
-  border: none; /* 确保没有边框 */
+  margin: 0 auto;
+  box-shadow: none;
+  border: none;
 }
 
 /* 确保表格包装器没有边框 */
@@ -459,6 +477,13 @@ body.dragging-active {
 /* 确保列宽设置被严格应用 */
 .detail-scoreboard-table .ant-table-container {
   table-layout: fixed !important;
+}
+
+/* 设置表格滚动区域 */
+.detail-scoreboard-table .ant-table-body {
+  max-height: calc(100vh - 300px) !important;
+  overflow-y: auto !important;
+  overflow-x: auto !important;
 }
 
 .detail-scoreboard-table .ant-table-thead > tr > th,

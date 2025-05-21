@@ -4,7 +4,6 @@
  * 支持动态配置题目数量和气球颜色
  */
 
-import React from "react";
 import type { ColumnsType } from "antd/es/table";
 import { ContestConfig } from "../types/contest";
 import { Row, Rank } from "../types/rank";
@@ -22,10 +21,12 @@ import "../styles/Contest.css";
  * @interface TableColumnsProps
  * @property {ContestConfig} contestConfig - 比赛配置信息
  * @property {Rank} rankData - 排名数据
+ * @property {{ schoolWidth: number; teamWidth: number } | null} [columnWidths] - 可选的列宽配置
  */
 interface TableColumnsProps {
   contestConfig: ContestConfig;
   rankData: Rank;
+  columnWidths?: { schoolWidth: number; teamWidth: number } | null;
 }
 
 /**
@@ -36,6 +37,7 @@ interface TableColumnsProps {
 const useTableColumns = ({
   contestConfig,
   rankData,
+  columnWidths,
 }: TableColumnsProps): ColumnsType<Row> => {
   if (!contestConfig || !rankData) return [];
 
@@ -60,7 +62,7 @@ const useTableColumns = ({
       title: "School",
       dataIndex: "organization",
       key: "organization",
-      width: 150,
+      width: columnWidths?.schoolWidth || 150,
       render: (text: string, record: Row) => (
         <SchoolCell text={text} orgPlace={record.org_place} />
       ),
@@ -70,7 +72,7 @@ const useTableColumns = ({
       title: "Team",
       dataIndex: "team",
       key: "team",
-      width: 140,
+      width: columnWidths?.teamWidth || 140,
       render: (text: string, record: Row) => (
         <TeamCell teamName={text} isGirlTeam={record.girl} />
       ),

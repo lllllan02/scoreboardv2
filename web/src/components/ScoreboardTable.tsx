@@ -16,11 +16,13 @@ import "../styles/Contest.css";
  * @property {ContestConfig} contestConfig - 比赛配置信息
  * @property {Rank} rankData - 排名数据
  * @property {boolean} [loading] - 可选的加载状态
+ * @property {{ schoolWidth: number; teamWidth: number } | null} [columnWidths] - 可选的列宽配置
  */
 interface ScoreboardTableProps {
   contestConfig: ContestConfig;
   rankData: Rank;
   loading?: boolean;
+  columnWidths?: { schoolWidth: number; teamWidth: number } | null;
 }
 
 /**
@@ -31,9 +33,10 @@ interface ScoreboardTableProps {
 const ScoreboardTable: React.FC<ScoreboardTableProps> = ({
   contestConfig,
   rankData,
+  columnWidths
 }) => {
   // 获取表格列配置
-  const columns = useTableColumns({ contestConfig, rankData });
+  const columns = useTableColumns({ contestConfig, rankData, columnWidths });
 
   return (
     <div className="detail-scoreboard">

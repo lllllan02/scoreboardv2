@@ -8,12 +8,50 @@ import { Rank } from "../types/rank";
 import { Submission } from "../types/submission";
 import { CloseCircleOutlined } from "@ant-design/icons";
 import { Spin } from "antd";
+import InfiniteScroll from "react-infinite-scroll-component";
 import "../styles/Contest.css";
 import ContestHeader from "../components/ContestHeader";
 import ProgressBar from "../components/ProgressBar";
 import ScoreboardTable from "../components/ScoreboardTable";
 import GroupFilter from "../components/GroupFilter";
 import SubmissionList from "../components/SubmissionList";
+
+// 每次加载的队伍数量
+const ITEMS_PER_PAGE = 50;
+
+// 计算最大列宽的函数
+const calculateMaxColumnWidths = (rankData: Rank) => {
+  let maxSchoolWidth = 150; // 默认最小宽度
+  let maxTeamWidth = 140; // 默认最小宽度
+
+  // 遍历所有数据计算最大宽度
+  rankData.rows.forEach((row) => {
+    // 使用 canvas 计算文本宽度
+    const canvas = document.createElement("canvas");
+    const context = canvas.getContext("2d");
+    if (context) {
+      context.font =
+        '14px -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial';
+
+      // 计算学校名称宽度
+      // 学校名称的总宽度 = 文本宽度 + 学校排名宽度(25px) + 左右padding(16px) + 安全边距(10px)
+      const schoolTextWidth = context.measureText(row.organization).width;
+      const schoolWidth = schoolTextWidth + (row.org_place > 0 ? 25 : 0) + 16 + 10;
+      maxSchoolWidth = Math.max(maxSchoolWidth, schoolWidth);
+
+      // 计算队伍名称宽度
+      // 队伍名称的总宽度 = 文本宽度 + 女队图标宽度(24px) + 图标间距(8px) + 左右padding(16px) + 安全边距(10px)
+      const teamTextWidth = context.measureText(row.team).width;
+      const teamWidth = teamTextWidth + (row.girl ? 32 : 0) + 16 + 10;
+      maxTeamWidth = Math.max(maxTeamWidth, teamWidth);
+    }
+  });
+
+  return {
+    schoolWidth: Math.ceil(maxSchoolWidth),
+    teamWidth: Math.ceil(maxTeamWidth),
+  };
+};
 
 const Contest: React.FC = () => {
   // 状态管理
@@ -22,9 +60,14 @@ const Contest: React.FC = () => {
     null
   );
   const [rankData, setRankData] = useState<Rank | null>(null);
-  const [filteredRankData, setFilteredRankData] = useState<Rank | null>(null);
+  const [visibleRows, setVisibleRows] = useState<Rank["rows"]>([]);
+  const [hasMore, setHasMore] = useState(true);
   const initialLoadCompleted = useRef(false); // 跟踪初始加载是否已完成
   const [isLoading, setIsLoading] = useState(true);
+  const [columnWidths, setColumnWidths] = useState<{
+    schoolWidth: number;
+    teamWidth: number;
+  } | null>(null);
 
   // 使用 useLocation 和 useNavigate 获取和更新 URL
   const location = useLocation();
@@ -32,8 +75,12 @@ const Contest: React.FC = () => {
 
   // 从 URL 参数中获取初始值
   const searchParams = new URLSearchParams(location.search);
-  const [selectedGroup, setSelectedGroup] = useState(searchParams.get("group") || "all");
-  const [selectedAction, setSelectedAction] = useState(searchParams.get("action") || "rank");
+  const [selectedGroup, setSelectedGroup] = useState(
+    searchParams.get("group") || "all"
+  );
+  const [selectedAction, setSelectedAction] = useState(
+    searchParams.get("action") || "rank"
+  );
   const [relativeTimeMs, setRelativeTimeMs] = useState<number | null>(
     searchParams.get("t") ? parseInt(searchParams.get("t")!) : null
   );
@@ -42,22 +89,27 @@ const Contest: React.FC = () => {
   const apiPath = location.pathname;
 
   // 更新 URL 参数的函数
-  const updateUrlParams = useCallback((group: string, action: string, time?: number) => {
-    const params = new URLSearchParams();
-    if (group && group !== "all") {
-      params.set("group", group);
-    }
-    if (action && action !== "rank") {
-      params.set("action", action);
-    }
-    if (time) {
-      params.set("t", time.toString());
-    }
-    
-    // 构建新的 URL，保持路径不变，只更新参数
-    const newUrl = `${location.pathname}${params.toString() ? `?${params.toString()}` : ""}`;
-    navigate(newUrl, { replace: true });
-  }, [location.pathname, navigate]);
+  const updateUrlParams = useCallback(
+    (group: string, action: string, time?: number) => {
+      const params = new URLSearchParams();
+      if (group && group !== "all") {
+        params.set("group", group);
+      }
+      if (action && action !== "rank") {
+        params.set("action", action);
+      }
+      if (time) {
+        params.set("t", time.toString());
+      }
+
+      // 构建新的 URL，保持路径不变，只更新参数
+      const newUrl = `${location.pathname}${
+        params.toString() ? `?${params.toString()}` : ""
+      }`;
+      navigate(newUrl, { replace: true });
+    },
+    [location.pathname, navigate]
+  );
 
   // 获取排行榜数据
   const fetchRankData = useCallback(
@@ -70,14 +122,22 @@ const Contest: React.FC = () => {
           selectedGroup
         );
         setRankData(rank);
-        setFilteredRankData(rank); // 由于后端已经过滤，直接使用返回的数据
+
+        // 计算最大列宽（仅在首次加载时）
+        if (!columnWidths) {
+          const widths = calculateMaxColumnWidths(rank);
+          setColumnWidths(widths);
+        }
+
+        // 初始只加载部分数据
+        setHasMore(rank.rows.length > ITEMS_PER_PAGE);
+        setVisibleRows(rank.rows.slice(0, ITEMS_PER_PAGE));
       } catch (err) {
         console.error("获取排行榜数据失败:", err);
         setError("获取排行榜数据失败");
-      } finally {
       }
     },
-    [apiPath]
+    [apiPath, columnWidths]
   );
 
   // 获取配置数据（也传递时间参数）
@@ -109,7 +169,12 @@ const Contest: React.FC = () => {
 
   // 获取提交列表数据
   const fetchSubmissionData = useCallback(
-    async (selectedGroup?: string, relativeTimeMs?: number, page: number = 1, size: number = 50) => {
+    async (
+      selectedGroup?: string,
+      relativeTimeMs?: number,
+      page: number = 1,
+      size: number = 50
+    ) => {
       try {
         setSubmissionsLoading(true);
         const response = await getContestSubmissions(
@@ -168,10 +233,11 @@ const Contest: React.FC = () => {
           // 计算初始时间
           let initialTimeMs: number;
           const urlTimeParam = searchParams.get("t");
-          
+
           if (!urlTimeParam) {
             // 如果 URL 中没有时间参数，使用比赛结束时间
-            const contestDurationSec = (config.end_time || 0) - (config.start_time || 0);
+            const contestDurationSec =
+              (config.end_time || 0) - (config.start_time || 0);
             initialTimeMs = contestDurationSec * 1000;
           } else {
             initialTimeMs = parseInt(urlTimeParam);
@@ -187,7 +253,12 @@ const Contest: React.FC = () => {
 
           // 根据当前的 action 一次性获取所需数据
           if (selectedAction === "submit") {
-            await fetchSubmissionData(selectedGroup, initialTimeMs, 1, pageSize);
+            await fetchSubmissionData(
+              selectedGroup,
+              initialTimeMs,
+              1,
+              pageSize
+            );
           } else {
             await fetchRankData(selectedGroup, initialTimeMs);
           }
@@ -215,7 +286,7 @@ const Contest: React.FC = () => {
 
       console.log("时间变化，更新数据:", newRelativeTimeMs);
       setRelativeTimeMs(newRelativeTimeMs);
-      
+
       // 更新 URL 参数
       updateUrlParams(selectedGroup, selectedAction, newRelativeTimeMs);
 
@@ -224,7 +295,7 @@ const Contest: React.FC = () => {
         // 使用 setTimeout 进行简单的防抖
         const timeoutId = setTimeout(() => {
           fetchData(selectedGroup, selectedAction, newRelativeTimeMs);
-        }, 300);  // 300ms 的防抖延迟
+        }, 300); // 300ms 的防抖延迟
 
         return () => clearTimeout(timeoutId);
       }
@@ -246,7 +317,7 @@ const Contest: React.FC = () => {
       console.log("handleGroupChange called with:", values);
       setSelectedGroup(values.group);
       setSelectedAction(values.action);
-      
+
       // 更新 URL 参数
       updateUrlParams(values.group, values.action, relativeTimeMs ?? undefined);
 
@@ -272,6 +343,20 @@ const Contest: React.FC = () => {
     },
     [selectedGroup, relativeTimeMs, fetchData]
   );
+
+  // 加载更多数据
+  const loadMoreData = useCallback(() => {
+    if (!hasMore || !rankData) return;
+
+    const currentLength = visibleRows.length;
+    const nextItems = rankData.rows.slice(
+      currentLength,
+      currentLength + ITEMS_PER_PAGE
+    );
+
+    setVisibleRows((prev) => [...prev, ...nextItems]);
+    setHasMore(currentLength + ITEMS_PER_PAGE < rankData.rows.length);
+  }, [hasMore, rankData, visibleRows.length]);
 
   if (error) {
     return (
@@ -312,8 +397,8 @@ const Contest: React.FC = () => {
       </div>
 
       {/* 添加分组筛选器 */}
-      <GroupFilter 
-        contestConfig={contestConfig} 
+      <GroupFilter
+        contestConfig={contestConfig}
         onChange={handleGroupChange}
         initialGroup={selectedGroup}
         initialAction={selectedAction}
@@ -330,10 +415,33 @@ const Contest: React.FC = () => {
           onPageChange={handleSubmissionPageChange}
         />
       ) : (
-        <ScoreboardTable
-          contestConfig={contestConfig}
-          rankData={rankData!}
-        />
+        <div className="detail-scoreboard">
+          <InfiniteScroll
+            dataLength={visibleRows.length}
+            next={loadMoreData}
+            hasMore={hasMore}
+            loader={
+              <div className="loading-more-container">
+                <Spin size="small">
+                  <div style={{ padding: "10px", textAlign: "center" }}>
+                    加载更多...
+                  </div>
+                </Spin>
+              </div>
+            }
+            endMessage={<div className="end-message">已经到底啦 ~</div>}
+            style={{ overflow: "visible" }}
+          >
+            <ScoreboardTable
+              contestConfig={contestConfig}
+              rankData={{
+                ...rankData!,
+                rows: visibleRows,
+              }}
+              columnWidths={columnWidths}
+            />
+          </InfiniteScroll>
+        </div>
       )}
     </div>
   );
