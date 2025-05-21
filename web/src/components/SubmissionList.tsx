@@ -4,6 +4,7 @@ import type { ColumnsType } from "antd/es/table";
 import { Submission } from "../types/submission";
 import { ContestConfig } from "../types/contest";
 import { WomanOutlined } from "@ant-design/icons";
+import { getContrastColor } from "../utils/colorUtils";
 import "../styles/Contest.css";
 
 interface SubmissionListProps {
@@ -34,19 +35,66 @@ const SubmissionList: React.FC<SubmissionListProps> = ({
     return `${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
   };
 
+  // 格式化状态文本
+  const formatStatus = (status: string) => {
+    return status
+      .split('_')
+      .map(word => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase())
+      .join(' ');
+  };
+
   const columns: ColumnsType<Submission> = [
     {
-      title: "提交时间",
-      dataIndex: "timestamp",
-      key: "timestamp",
-      width: 120,
-      render: (timestamp: number) => formatRelativeTime(timestamp),
+      title: "题目",
+      dataIndex: "problem_id",
+      key: "problem_id",
+      width: 80,
+      align: "center",
+      fixed: "left",
+      render: (problem_id: string) => {
+        // 将题号转换为索引 (A->0, B->1, etc.)
+        const index = problem_id.charCodeAt(0) - 65;
+        let backgroundColor = "#1890ff";
+        let color = "white";
+
+        // 如果有气球颜色配置，使用配置的颜色
+        if (contestConfig.balloon_color && contestConfig.balloon_color[index]) {
+          const balloon = contestConfig.balloon_color[index];
+          if (balloon.background_color) {
+            backgroundColor = balloon.background_color;
+            // 根据背景色自动计算对比度良好的文字颜色
+            color = getContrastColor(balloon.background_color);
+          }
+        }
+
+        return (
+          <div className="problem-cell-container">
+            <div 
+              className="problem-id-tag"
+              style={{ 
+                backgroundColor,
+                color
+              }}
+            >
+              {problem_id}
+            </div>
+          </div>
+        );
+      },
+    },
+    {
+      title: "学校",
+      dataIndex: "organization",
+      key: "organization",
+      width: "20%",
+      ellipsis: true,
     },
     {
       title: "队伍",
       dataIndex: "team",
       key: "team",
-      width: 200,
+      width: "30%",
+      ellipsis: true,
       render: (team: string, record: Submission) => (
         <span>
           {team}
@@ -55,38 +103,30 @@ const SubmissionList: React.FC<SubmissionListProps> = ({
       ),
     },
     {
-      title: "学校",
-      dataIndex: "organization",
-      key: "organization",
-      width: 200,
-    },
-    {
-      title: "题目",
-      dataIndex: "problem_id",
-      key: "problem_id",
-      width: 80,
+      title: "状态",
+      dataIndex: "status",
+      key: "status",
+      width: 160,
+      render: (status: string) => {
+        const formattedStatus = status.toLowerCase();
+        const statusClass = `status-${formattedStatus}`;
+        return <span className={statusClass}>{formatStatus(status)}</span>;
+      },
     },
     {
       title: "语言",
       dataIndex: "language",
       key: "language",
       width: 100,
+      align: "center",
     },
     {
-      title: "状态",
-      dataIndex: "status",
-      key: "status",
-      width: 150,
-      render: (status: string) => {
-        const statusClass = `status-${status.toLowerCase().replace(/ /g, '-')}`;
-        return <span className={statusClass}>{status}</span>;
-      },
-    },
-    {
-      title: "提交ID",
-      dataIndex: "id",
-      key: "id",
+      title: "提交时间",
+      dataIndex: "timestamp",
+      key: "timestamp",
       width: 120,
+      align: "center",
+      render: (timestamp: number) => formatRelativeTime(timestamp),
     },
   ];
 
@@ -107,7 +147,7 @@ const SubmissionList: React.FC<SubmissionListProps> = ({
         }}
         loading={loading}
         size="small"
-        scroll={{ x: true }}
+        scroll={{ x: "100%" }}
       />
     </div>
   );
