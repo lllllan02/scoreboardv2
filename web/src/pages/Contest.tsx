@@ -7,6 +7,7 @@ import { ContestConfig } from "../types/contest";
 import { Rank } from "../types/rank";
 import { Submission } from "../types/submission";
 import { CloseCircleOutlined } from "@ant-design/icons";
+import { Spin } from "antd";
 import "../styles/Contest.css";
 import ContestHeader from "../components/ContestHeader";
 import ProgressBar from "../components/ProgressBar";
@@ -23,6 +24,7 @@ const Contest: React.FC = () => {
   const [rankData, setRankData] = useState<Rank | null>(null);
   const [filteredRankData, setFilteredRankData] = useState<Rank | null>(null);
   const initialLoadCompleted = useRef(false); // 跟踪初始加载是否已完成
+  const [isLoading, setIsLoading] = useState(true);
 
   // 使用 useLocation 和 useNavigate 获取和更新 URL
   const location = useLocation();
@@ -147,10 +149,66 @@ const Contest: React.FC = () => {
     [fetchRankData, fetchSubmissionData, pageSize]
   );
 
-  // 处理相对时间变化 - 但避免初始加载时重复触发
-  const handleTimeChange = useCallback(
+  // 修改初始化逻辑，添加加载状态控制
+  useEffect(() => {
+    if (!initialLoadCompleted.current) {
+      const fetchInitialData = async () => {
+        try {
+          setIsLoading(true);
+          console.log("执行初始数据加载...");
+          setError(null);
+
+          // 首先获取初始配置
+          const config = await fetchConfigData();
+          if (!config) {
+            setError("获取比赛配置失败");
+            return;
+          }
+
+          // 计算初始时间
+          let initialTimeMs: number;
+          const urlTimeParam = searchParams.get("t");
+          
+          if (!urlTimeParam) {
+            // 如果 URL 中没有时间参数，使用比赛结束时间
+            const contestDurationSec = (config.end_time || 0) - (config.start_time || 0);
+            initialTimeMs = contestDurationSec * 1000;
+          } else {
+            initialTimeMs = parseInt(urlTimeParam);
+          }
+
+          // 设置时间状态
+          setRelativeTimeMs(initialTimeMs);
+
+          // 只在没有 URL 时间参数的情况下更新 URL，避免重复更新
+          if (!urlTimeParam) {
+            updateUrlParams(selectedGroup, selectedAction, initialTimeMs);
+          }
+
+          // 根据当前的 action 一次性获取所需数据
+          if (selectedAction === "submit") {
+            await fetchSubmissionData(selectedGroup, initialTimeMs, 1, pageSize);
+          } else {
+            await fetchRankData(selectedGroup, initialTimeMs);
+          }
+
+          // 标记初始加载已完成
+          initialLoadCompleted.current = true;
+        } catch (err) {
+          console.error("获取数据失败:", err);
+          setError("获取数据失败，请检查路径是否正确");
+        } finally {
+          setIsLoading(false);
+        }
+      };
+
+      fetchInitialData();
+    }
+  }, []);
+
+  // 处理时间变化的防抖
+  const debouncedTimeChange = useCallback(
     (newRelativeTimeMs: number) => {
-      // 避免与初始值相同时重复触发
       if (relativeTimeMs === newRelativeTimeMs) {
         return;
       }
@@ -163,10 +221,23 @@ const Contest: React.FC = () => {
 
       // 检查是否初始加载已完成再更新数据
       if (initialLoadCompleted.current) {
-        fetchData(selectedGroup, selectedAction, newRelativeTimeMs);
+        // 使用 setTimeout 进行简单的防抖
+        const timeoutId = setTimeout(() => {
+          fetchData(selectedGroup, selectedAction, newRelativeTimeMs);
+        }, 300);  // 300ms 的防抖延迟
+
+        return () => clearTimeout(timeoutId);
       }
     },
     [fetchData, relativeTimeMs, selectedGroup, selectedAction, updateUrlParams]
+  );
+
+  // 更新 handleTimeChange 使用防抖版本
+  const handleTimeChange = useCallback(
+    (newRelativeTimeMs: number) => {
+      debouncedTimeChange(newRelativeTimeMs);
+    },
+    [debouncedTimeChange]
   );
 
   // 处理分组和动作变化
@@ -202,60 +273,6 @@ const Contest: React.FC = () => {
     [selectedGroup, relativeTimeMs, fetchData]
   );
 
-  // 初始加载配置和数据 - 仅执行一次
-  useEffect(() => {
-    // 确保只在初次渲染时执行一次
-    if (!initialLoadCompleted.current) {
-      const fetchData = async () => {
-        try {
-          console.log("执行初始数据加载...");
-          setError(null);
-
-          // 首先获取初始配置（不带时间参数）
-          const config = await fetchConfigData();
-
-          if (config) {
-            // 如果 URL 中没有时间参数，使用比赛结束时间
-            if (!searchParams.get("t")) {
-              // 如果配置加载成功，计算比赛结束时的相对时间（毫秒）
-              const contestDurationSec =
-                (config.end_time || 0) - (config.start_time || 0);
-              const endTimeMs = contestDurationSec * 1000;
-
-              // 设置初始时间为比赛结束时间（100%）
-              setRelativeTimeMs(endTimeMs);
-              updateUrlParams(selectedGroup, selectedAction, endTimeMs);
-
-              // 根据当前的 action 获取对应数据
-              if (selectedAction === "submit") {
-                await fetchSubmissionData(selectedGroup, endTimeMs, 1, pageSize);
-              } else {
-                await fetchRankData(selectedGroup, endTimeMs);
-              }
-            } else {
-              // 使用 URL 中的时间参数
-              const timeMs = parseInt(searchParams.get("t")!);
-              if (selectedAction === "submit") {
-                await fetchSubmissionData(selectedGroup, timeMs, 1, pageSize);
-              } else {
-                await fetchRankData(selectedGroup, timeMs);
-              }
-            }
-          }
-
-          // 标记初始加载已完成
-          initialLoadCompleted.current = true;
-        } catch (err) {
-          console.error("获取数据失败:", err);
-          setError("获取数据失败，请检查路径是否正确");
-        } finally {
-        }
-      };
-
-      fetchData();
-    }
-  }, [apiPath, fetchRankData, fetchConfigData, searchParams, selectedGroup, selectedAction, updateUrlParams, fetchSubmissionData, pageSize]);
-
   if (error) {
     return (
       <div className="detail-error-message">
@@ -265,11 +282,18 @@ const Contest: React.FC = () => {
     );
   }
 
+  if (isLoading) {
+    return (
+      <div className="detail-loading-container">
+        <Spin size="large" tip="加载中..." />
+      </div>
+    );
+  }
+
   if (!contestConfig || (selectedAction !== "submit" && !rankData)) {
     return (
-      <div className="detail-error-message">
-        <CloseCircleOutlined className="detail-error-icon" />
-        比赛配置或排行榜数据不存在
+      <div className="detail-loading-container">
+        <Spin size="large" tip="加载中..." />
       </div>
     );
   }
@@ -283,6 +307,7 @@ const Contest: React.FC = () => {
         <ProgressBar
           contestConfig={contestConfig}
           onTimeChange={handleTimeChange}
+          initialTimeMs={relativeTimeMs ?? undefined}
         />
       </div>
 

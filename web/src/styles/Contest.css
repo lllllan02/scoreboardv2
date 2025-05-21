@@ -1230,3 +1230,11 @@ body.dragging-active {
 .status-frozen {
   color: #8c8c8c;  /* 灰色 */
 }
+
+.detail-loading-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 400px;
+  width: 100%;
+}

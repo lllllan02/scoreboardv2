@@ -22,10 +22,12 @@ import "../styles/Contest.css";
  * @interface ProgressBarProps
  * @property {ContestConfig} contestConfig - 比赛配置信息
  * @property {Function} [onTimeChange] - 时间变化时的回调函数
+ * @property {number} [initialTimeMs] - 初始时间（毫秒）
  */
 interface ProgressBarProps {
   contestConfig: ContestConfig;
   onTimeChange?: (relativeTimeMs: number) => void;
+  initialTimeMs?: number;
 }
 
 /**
@@ -35,12 +37,24 @@ interface ProgressBarProps {
 const ProgressBar: React.FC<ProgressBarProps> = ({
   contestConfig,
   onTimeChange,
+  initialTimeMs,
 }) => {
   // 用于标记是否是首次渲染的引用
   const initialRenderRef = useRef(true);
 
+  // 计算初始滑块位置
+  const initialSliderPosition = useMemo(() => {
+    if (initialTimeMs === undefined) return 100;
+    const contestDurationMs =
+      ((contestConfig?.end_time || 0) - (contestConfig?.start_time || 0)) *
+      1000;
+    return (initialTimeMs / contestDurationMs) * 100;
+  }, [contestConfig, initialTimeMs]);
+
   // 滑块位置
-  const [sliderPosition, setSliderPosition] = React.useState(100);
+  const [sliderPosition, setSliderPosition] = React.useState(
+    initialSliderPosition
+  );
 
   // 计算相对时间（相对于比赛开始时间的毫秒数）
   const relativeTimeMs = useMemo(
