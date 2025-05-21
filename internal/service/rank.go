@@ -7,21 +7,6 @@ import (
 	"github.com/lllllan02/scoreboardv2/internal/model"
 )
 
-const (
-	// 所有队伍
-	GroupAll = "all"
-	// 女队
-	GroupGirl = "girl"
-	// 正式队伍
-	GroupOfficial = "official"
-	// 非正式队伍
-	GroupUnofficial = "unofficial"
-	// 本科队伍
-	GroupUndergraduate = "undergraduate"
-	// 高职队伍
-	GroupVocational = "vocational"
-)
-
 type Rank struct {
 	Rows        []*Row    `json:"rows"`         // 队伍列表
 	Submitted   []int     `json:"submitted"`    // 提交次数
@@ -38,6 +23,7 @@ type Row struct {
 	Team         string    `json:"team"`         // 队伍名称
 	Organization string    `json:"organization"` // 队伍组织
 	Girl         bool      `json:"girl"`         // 是否是女队
+	Unofficial   bool      `json:"unofficial"`   // 是否是非正式队伍
 	Place        int       `json:"place"`        // 排名
 	OrgPlace     int       `json:"org_place"`    // 组织排名
 	Solved       int       `json:"solved"`       // 解决题目数
@@ -125,6 +111,7 @@ func GetContestRank(path string, group string, t int) (*Rank, error) {
 				Team:         string(team.Name),
 				Organization: string(team.Organization),
 				Girl:         bool(team.Girl),
+				Unofficial:   team.IsUnofficial(),
 				Problems:     make([]Problem, config.ProblemQuantity),
 			}
 		}
@@ -177,6 +164,7 @@ func GetContestRank(path string, group string, t int) (*Rank, error) {
 				Team:         string(team.Name),
 				Organization: string(team.Organization),
 				Girl:         bool(team.Girl),
+				Unofficial:   bool(team.Unofficial),
 				Problems:     make([]Problem, config.ProblemQuantity),
 			}
 		}
@@ -240,15 +228,15 @@ func GetContestRank(path string, group string, t int) (*Rank, error) {
 // groupFilter 根据组别过滤队伍
 func groupFilter(team model.Team, group string) bool {
 	switch group {
-	case GroupGirl:
+	case model.GroupGirl:
 		return bool(team.Girl)
-	case GroupOfficial:
+	case model.GroupOfficial:
 		return bool(team.Official) || slices.Contains(team.Group, group)
-	case GroupUnofficial:
-		return bool(team.Unofficial) || slices.Contains(team.Group, group)
-	case GroupUndergraduate:
+	case model.GroupUnofficial:
+		return team.IsUnofficial()
+	case model.GroupUndergraduate:
 		return bool(team.Undergraduate) || slices.Contains(team.Group, group)
-	case GroupVocational:
+	case model.GroupVocational:
 		return bool(team.Vocational) || slices.Contains(team.Group, group)
 	default:
 		return true

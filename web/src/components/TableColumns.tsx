@@ -74,7 +74,11 @@ const useTableColumns = ({
       key: "team",
       width: columnWidths?.teamWidth || 140,
       render: (text: string, record: Row) => (
-        <TeamCell teamName={text} isGirlTeam={record.girl} />
+        <TeamCell 
+          teamName={text} 
+          isGirlTeam={record.girl} 
+          isUnofficial={record.unofficial}
+        />
       ),
     },
     // 解题数列

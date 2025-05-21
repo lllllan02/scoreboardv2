@@ -33,6 +33,7 @@ type Run struct {
 	Team         string `json:"team"`         // 队伍名称
 	Organization string `json:"organization"` // 队伍组织
 	Girl         bool   `json:"girl"`         // 是否是女队
+	Unofficial   bool   `json:"unofficial"`   // 是否是非正式队伍
 	Language     string `json:"language"`     // 语言
 	Status       string `json:"status"`       // 状态
 	Timestamp    int    `json:"timestamp"`    // 提交时间(相对时间，单位：毫秒)
@@ -122,6 +123,7 @@ func GetContestRun(path string, query ContestRunQuery) (result *ContestRun, err 
 			Team:         string(team.Name),
 			Organization: string(team.Organization),
 			Girl:         bool(team.Girl),
+			Unofficial:   team.IsUnofficial(),
 			Language:     run.Language,
 			Status:       run.Status,
 			Timestamp:    run.Timestamp,

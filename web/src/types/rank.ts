@@ -23,6 +23,7 @@ export interface Row {
   problems: Problem[];   // 题目列表
   group?: string;        // 队伍所属分组
   girl?: boolean;        // 是否为女队
+  unofficial?: boolean;  // 是否是非正式队伍
 }
 
 // 题目数据

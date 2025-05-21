@@ -1211,6 +1211,12 @@ body.dragging-active {
   flex-shrink: 0;
 }
 
+.unofficial-team-icon {
+  color: #faad14;
+  font-size: 16px;
+  flex-shrink: 0;
+}
+
 /* 提交列表样式 */
 .submission-list {
   margin: 20px 0;  /* 修改为只有上下边距 */

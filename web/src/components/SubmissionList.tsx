@@ -3,7 +3,7 @@ import { Table } from "antd";
 import type { ColumnsType } from "antd/es/table";
 import { Submission } from "../types/submission";
 import { ContestConfig } from "../types/contest";
-import { WomanOutlined } from "@ant-design/icons";
+import { WomanOutlined, StarOutlined } from "@ant-design/icons";
 import { getContrastColor } from "../utils/colorUtils";
 import "../styles/Contest.css";
 
@@ -99,6 +99,7 @@ const SubmissionList: React.FC<SubmissionListProps> = ({
         <span>
           {team}
           {record.girl && <WomanOutlined style={{ marginLeft: 8, color: '#eb2f96' }} />}
+          {record.unofficial && <StarOutlined style={{ marginLeft: 8, color: '#faad14' }} />}
         </span>
       ),
     },

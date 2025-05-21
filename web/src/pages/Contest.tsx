@@ -40,9 +40,9 @@ const calculateMaxColumnWidths = (rankData: Rank) => {
       maxSchoolWidth = Math.max(maxSchoolWidth, schoolWidth);
 
       // 计算队伍名称宽度
-      // 队伍名称的总宽度 = 文本宽度 + 女队图标宽度(24px) + 图标间距(8px) + 左右padding(16px) + 安全边距(10px)
+      // 队伍名称的总宽度 = 文本宽度 + 女队图标宽度(24px) + 非正式队伍图标宽度(24px) + 图标间距(8px) + 左右padding(16px) + 安全边距(10px)
       const teamTextWidth = context.measureText(row.team).width;
-      const teamWidth = teamTextWidth + (row.girl ? 32 : 0) + 16 + 10;
+      const teamWidth = teamTextWidth + (row.girl ? 32 : 0) + (row.unofficial ? 32 : 0) + 8 + 16 + 10;
       maxTeamWidth = Math.max(maxTeamWidth, teamWidth);
     }
   });

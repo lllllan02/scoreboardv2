@@ -5,7 +5,7 @@
 
 import React from "react";
 import { Tooltip } from "antd";
-import { WomanOutlined } from "@ant-design/icons";
+import { WomanOutlined, StarOutlined } from "@ant-design/icons";
 import "../styles/Contest.css";
 
 /**
@@ -13,17 +13,19 @@ import "../styles/Contest.css";
  * @interface TeamCellProps
  * @property {string} teamName - 队伍名称
  * @property {boolean} [isGirlTeam] - 是否为女队
+ * @property {boolean} [isUnofficial] - 是否为非正式队伍
  */
 interface TeamCellProps {
   teamName: string;
   isGirlTeam?: boolean;
+  isUnofficial?: boolean;
 }
 
 /**
  * TeamCell 组件实现
  * @param {TeamCellProps} props - 组件属性
  */
-const TeamCell: React.FC<TeamCellProps> = ({ teamName, isGirlTeam }) => {
+const TeamCell: React.FC<TeamCellProps> = ({ teamName, isGirlTeam, isUnofficial }) => {
   return (
     <div className="team-cell">
       <span className="team-name" title={teamName}>
@@ -32,6 +34,11 @@ const TeamCell: React.FC<TeamCellProps> = ({ teamName, isGirlTeam }) => {
       {isGirlTeam && (
         <Tooltip title="女队">
           <WomanOutlined className="girl-team-icon" />
+        </Tooltip>
+      )}
+      {isUnofficial && (
+        <Tooltip title="非正式队伍">
+          <StarOutlined className="unofficial-team-icon" />
         </Tooltip>
       )}
     </div>

@@ -21,7 +21,8 @@ export interface Submission {
   problem_id: string;
   team: string;
   organization: string;
-  girl: boolean;
+  girl?: boolean;
+  unofficial?: boolean;
   language: string;
   status: SubmissionStatus;
   timestamp: number;
