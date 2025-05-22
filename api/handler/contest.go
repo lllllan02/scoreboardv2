@@ -80,6 +80,24 @@ func GetContestRun(c *gin.Context) {
 	errors.SendSuccess(c, run)
 }
 
+// GetContestStat 返回比赛统计数据
+func GetContestStat(c *gin.Context) {
+	// 获取请求路径
+	path := c.Param("path")
+	group := c.Query("group")
+	t := cast.ToInt(c.Query("t"))
+
+	// 调用服务层获取数据
+	stat, err := service.GetContestStat(path, group, t)
+	if err != nil {
+		errors.SendError(c, err)
+		return
+	}
+
+	// 返回数据
+	errors.SendSuccess(c, stat)
+}
+
 // GetTeamTrend 返回队伍排名趋势数据
 func GetTeamTrend(c *gin.Context) {
 	// 获取请求路径

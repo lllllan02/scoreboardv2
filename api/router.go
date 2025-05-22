@@ -38,7 +38,10 @@ func SetupRouter() *gin.Engine {
 	r.GET("/api/rank/*path", handler.GetContestRank)
 	// 获取比赛提交
 	r.GET("/api/run/*path", handler.GetContestRun)
+	// 获取比赛统计
+	r.GET("/api/stat/*path", handler.GetContestStat)
 	// 队伍排名趋势
 	r.GET("/api/team-trend/*path", handler.GetTeamTrend)
+
 	return r
 }
