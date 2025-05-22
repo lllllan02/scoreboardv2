@@ -93,7 +93,6 @@ func GetContestStat(c *gin.Context) {
 		errors.SendError(c, err)
 		return
 	}
-
 	// 返回数据
 	errors.SendSuccess(c, stat)
 }

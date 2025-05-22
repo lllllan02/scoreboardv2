@@ -2,7 +2,7 @@ import React, { useEffect, useState, useCallback, useRef } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import { getContestConfig } from "../api/contestApi";
 import { getContestRank } from "../api/rankApi";
-import { getContestSubmissions } from "../api/contestApi";
+import { getContestSubmissions } from "../api/submission";
 import { ContestConfig } from "../types/contest";
 import { Rank } from "../types/rank";
 import { Submission } from "../types/submission";
@@ -15,6 +15,7 @@ import ProgressBar from "../components/ProgressBar";
 import ScoreboardTable from "../components/ScoreboardTable";
 import GroupFilter from "../components/GroupFilter";
 import SubmissionList from "../components/SubmissionList";
+import StatsPanel from "../components/StatsPanel";
 
 // 每次加载的队伍数量
 const ITEMS_PER_PAGE = 50;
@@ -413,6 +414,12 @@ const Contest: React.FC = () => {
           currentPage={currentPage}
           pageSize={pageSize}
           onPageChange={handleSubmissionPageChange}
+        />
+      ) : selectedAction === "stats" ? (
+        <StatsPanel 
+          contestConfig={contestConfig} 
+          selectedGroup={selectedGroup}
+          relativeTimeMs={relativeTimeMs}
         />
       ) : (
         <div className="detail-scoreboard">

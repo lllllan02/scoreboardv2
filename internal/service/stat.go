@@ -154,7 +154,9 @@ func GetContestStat(path string, group string, t int) (result *ContestStat, err 
 		}
 	}
 
-	result.AcceptedRate = float64(result.AcceptedCount) / float64(result.RunCount)
+	if result.RunCount > 0 {
+		result.AcceptedRate = float64(result.AcceptedCount) / float64(result.RunCount)
+	}
 	result.AcceptedTeamCount[0] = result.TeamCount
 	for _, team := range teamAccepted {
 		result.AcceptedTeamCount[0]--
