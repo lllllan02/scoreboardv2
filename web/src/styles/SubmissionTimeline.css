@@ -1,0 +1,110 @@
+.timeline-container {
+  display: flex;
+  margin: 8px 0;
+  padding: 8px;
+  background: #fff;
+  border-radius: 4px;
+  position: relative;
+  align-items: center;
+  width: 100%;
+}
+
+.timeline-container:hover {
+  background: #fafafa;
+}
+
+.problem-label {
+  min-width: 32px;
+  height: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 4px;
+  margin-right: 12px;
+  font-weight: 600;
+  font-size: 14px;
+  box-shadow: 0 2px 4px rgba(24, 144, 255, 0.1);
+  position: relative;
+  z-index: 2;
+  flex-shrink: 0;
+}
+
+.main-container {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  min-width: 0;
+}
+
+.submission-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 4px;
+  background: #fff;
+  border-radius: 4px;
+  position: relative;
+  width: 100%;
+}
+
+.submission-label {
+  font-size: 12px;
+  font-weight: 500;
+  padding: 2px 8px;
+  border-radius: 4px;
+  width: 64px;
+  text-align: center;
+  position: relative;
+  z-index: 1;
+  flex-shrink: 0;
+}
+
+.submission-label-accepted {
+  color: #52c41a;
+  background: rgba(82, 196, 26, 0.1);
+}
+
+.submission-label-rejected {
+  color: #ff4d4f;
+  background: rgba(255, 77, 79, 0.1);
+}
+
+.submissions-container {
+  display: grid;
+  grid-template-columns: repeat(50, 1fr);
+  gap: 1px;
+  position: relative;
+  z-index: 1;
+  flex: 1;
+  min-height: 20px;
+  height: 24px;
+  align-items: center;
+  background: #f5f5f5;
+  border-radius: 2px;
+  padding: 1px;
+  min-width: 0;
+}
+
+.submission-dot {
+  width: 100%;
+  height: 100%;
+  border-radius: 1px;
+  transition: all 0.2s ease;
+}
+
+.submission-dot:hover {
+  transform: scale(1.2);
+  opacity: 1;
+}
+
+.stats-container {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-left: 12px;
+  padding-left: 12px;
+  border-left: 1px solid #f0f0f0;
+  flex-shrink: 0;
+  min-width: 60px;
+} 

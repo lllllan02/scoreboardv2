@@ -3,6 +3,22 @@ export interface StatResponse {
 	data: Stat;
 }
 
+export interface HeatmapItem {
+	timestamp: number;
+	status: 'accepted' | 'rejected';
+	count: number;
+}
+
+export interface ProblemHeatmap {
+	problem_id: string;
+	submissions: HeatmapItem[];
+}
+
+export interface ContestHeatmap {
+	total: ProblemHeatmap;
+	problems: ProblemHeatmap[];
+}
+
 export interface Stat {
 	problem_count: number;
 	team_count: number;
@@ -10,12 +26,7 @@ export interface Stat {
 	accepted_count: number;
 	rejected_count: number;
 	accepted_rate: number;
-	run_heatmap: RunHeatmap;
-	problem_run_heatmap: RunHeatmap[];
-	problem_run_count: number[];
-	problem_accepted_count: number[];
-	problem_rejected_count: number[];
-	accepted_team_count: number[];
+	contest_heatmap: ContestHeatmap;
 }
 
 export interface RunHeatmap {

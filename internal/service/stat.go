@@ -1,5 +1,36 @@
 package service
 
+import (
+	"sort"
+)
+
+const (
+	StatusAccepted = "accepted"
+	StatusRejected = "rejected"
+
+	// 热力图时间段数量
+	TimeSlotCount = 50 // 将比赛时间划分为50个时间段
+)
+
+// HeatmapItem 表示一个时间点的提交情况
+type HeatmapItem struct {
+	Timestamp int    `json:"timestamp"` // 时间戳（相对时间，毫秒）
+	Status    string `json:"status"`    // 提交状态：accepted/rejected
+	Count     int    `json:"count"`     // 提交次数
+}
+
+// ProblemHeatmap 表示一个题目的提交热力图
+type ProblemHeatmap struct {
+	ProblemID   string        `json:"problem_id"`  // 题目ID (A, B, C...)
+	Submissions []HeatmapItem `json:"submissions"` // 提交记录
+}
+
+// ContestHeatmap 表示整个比赛的提交热力图
+type ContestHeatmap struct {
+	Total    ProblemHeatmap   `json:"total"`    // 总体提交热力图
+	Problems []ProblemHeatmap `json:"problems"` // 每个题目的提交热力图
+}
+
 // ContestStat 比赛统计数据
 type ContestStat struct {
 	// 题目数量
@@ -14,29 +45,8 @@ type ContestStat struct {
 	RejectedCount int `json:"rejected_count"`
 	// 通过率
 	AcceptedRate float64 `json:"accepted_rate"`
-
-	// 提交热力图
-	RunHeatmap RunHeatmap `json:"run_heatmap"`
-	// 题目提交热力图
-	ProblemRunHeatmap []*RunHeatmap `json:"problem_run_heatmap"`
-	// 题目提交数量
-	ProblemRunCount []int `json:"problem_run_count"`
-	// 题目通过数量
-	ProblemAcceptedCount []int `json:"problem_accepted_count"`
-	// 题目不通过数量
-	ProblemRejectedCount []int `json:"problem_rejected_count"`
-	// 通过题数队伍统计
-	AcceptedTeamCount []int `json:"accepted_team_count"`
-}
-
-type RunHeatmap struct {
-	Accepted []*RunHeatmapItem `json:"accepted"`
-	Rejected []*RunHeatmapItem `json:"rejected"`
-}
-
-type RunHeatmapItem struct {
-	Timestamp int `json:"timestamp"` // 时间戳
-	Count     int `json:"count"`     // 数量
+	// 比赛提交热力图
+	ContestHeatmap ContestHeatmap `json:"contest_heatmap"`
 }
 
 // GetContestStat 返回比赛统计数据
@@ -49,20 +59,17 @@ func GetContestStat(path string, group string, t int) (result *ContestStat, err 
 
 	// 初始化统计数据
 	result = &ContestStat{
-		ProblemCount:         config.ProblemQuantity,
-		ProblemRunHeatmap:    make([]*RunHeatmap, config.ProblemQuantity),
-		ProblemRunCount:      make([]int, config.ProblemQuantity), // 初始化题目提交数量数组
-		ProblemAcceptedCount: make([]int, config.ProblemQuantity),
-		ProblemRejectedCount: make([]int, config.ProblemQuantity),
-		AcceptedTeamCount:    make([]int, config.ProblemQuantity+1),
-		RunHeatmap:           RunHeatmap{}, // 初始化总体热力图
+		ProblemCount: config.ProblemQuantity,
+		ContestHeatmap: ContestHeatmap{
+			Problems: make([]ProblemHeatmap, config.ProblemQuantity),
+		},
 	}
 
 	// 初始化每个题目的热力图
 	for i := 0; i < config.ProblemQuantity; i++ {
-		result.ProblemRunHeatmap[i] = &RunHeatmap{
-			Accepted: make([]*RunHeatmapItem, 0),
-			Rejected: make([]*RunHeatmapItem, 0),
+		result.ContestHeatmap.Problems[i] = ProblemHeatmap{
+			ProblemID:   string(rune('A' + i)),
+			Submissions: make([]HeatmapItem, 0),
 		}
 	}
 
@@ -83,84 +90,124 @@ func GetContestStat(path string, group string, t int) (result *ContestStat, err 
 		return nil, err
 	}
 
-	teamAccepted := make(map[string]map[int]bool)
-
-	// 创建时间戳到提交次数的映射
-	totalAcceptedMap := make(map[int]int)
-	totalRejectedMap := make(map[int]int)
-	problemAcceptedMap := make([]map[int]int, config.ProblemQuantity)
-	problemRejectedMap := make([]map[int]int, config.ProblemQuantity)
-
-	for i := 0; i < config.ProblemQuantity; i++ {
-		problemAcceptedMap[i] = make(map[int]int)
-		problemRejectedMap[i] = make(map[int]int)
+	// 计算时间段长度
+	timeSlotDuration := t / TimeSlotCount // 每个时间段的长度（毫秒）
+	if timeSlotDuration < 1 {
+		timeSlotDuration = 1 // 确保至少为1毫秒
 	}
 
+	// 创建时间段到提交次数的映射
+	totalSubmissions := make(map[int]map[string]int)
+	problemSubmissions := make([]map[int]map[string]int, config.ProblemQuantity)
+
+	// 初始化提交统计映射
+	for i := 0; i < config.ProblemQuantity; i++ {
+		problemSubmissions[i] = make(map[int]map[string]int)
+	}
+
+	// 统计提交数据
 	for _, run := range runList {
 		if run.Timestamp > t {
 			continue
 		}
 
 		result.RunCount++
-		result.ProblemRunCount[run.ProblemId]++
 
-		// 更新热力图数据
+		// 计算时间段
+		timeSlot := (run.Timestamp / timeSlotDuration) * timeSlotDuration
+
+		// 更新总体提交统计
+		if totalSubmissions[timeSlot] == nil {
+			totalSubmissions[timeSlot] = make(map[string]int)
+		}
+
+		status := StatusRejected
 		if run.Status == "ACCEPTED" {
+			status = StatusAccepted
 			result.AcceptedCount++
-			result.ProblemAcceptedCount[run.ProblemId]++
-			totalAcceptedMap[run.Timestamp]++
-			problemAcceptedMap[run.ProblemId][run.Timestamp]++
-
-			teamid := string(run.TeamId)
-			if _, ok := teamAccepted[teamid]; !ok {
-				teamAccepted[teamid] = make(map[int]bool)
-			}
-			teamAccepted[teamid][run.ProblemId] = true
 		} else {
 			result.RejectedCount++
-			result.ProblemRejectedCount[run.ProblemId]++
-			totalRejectedMap[run.Timestamp]++
-			problemRejectedMap[run.ProblemId][run.Timestamp]++
 		}
+		totalSubmissions[timeSlot][status]++
+
+		// 更新题目提交统计
+		if problemSubmissions[run.ProblemId][timeSlot] == nil {
+			problemSubmissions[run.ProblemId][timeSlot] = make(map[string]int)
+		}
+		problemSubmissions[run.ProblemId][timeSlot][status]++
 	}
 
-	// 构建总体热力图
-	for timestamp, count := range totalAcceptedMap {
-		result.RunHeatmap.Accepted = append(result.RunHeatmap.Accepted, &RunHeatmapItem{
-			Timestamp: timestamp,
-			Count:     count,
+	// 生成总体热力图数据
+	totalHeatmap := make([]HeatmapItem, 0)
+	for slot := 0; slot < TimeSlotCount; slot++ {
+		timeSlot := slot * timeSlotDuration
+		acceptedCount := 0
+		rejectedCount := 0
+
+		if counts, ok := totalSubmissions[timeSlot]; ok {
+			acceptedCount = counts[StatusAccepted]
+			rejectedCount = counts[StatusRejected]
+		}
+
+		totalHeatmap = append(totalHeatmap, HeatmapItem{
+			Timestamp: timeSlot,
+			Status:    StatusAccepted,
+			Count:     acceptedCount,
+		})
+		totalHeatmap = append(totalHeatmap, HeatmapItem{
+			Timestamp: timeSlot,
+			Status:    StatusRejected,
+			Count:     rejectedCount,
 		})
 	}
-	for timestamp, count := range totalRejectedMap {
-		result.RunHeatmap.Rejected = append(result.RunHeatmap.Rejected, &RunHeatmapItem{
-			Timestamp: timestamp,
-			Count:     count,
+
+	// 按时间戳排序
+	sort.Slice(totalHeatmap, func(i, j int) bool {
+		return totalHeatmap[i].Timestamp < totalHeatmap[j].Timestamp
+	})
+
+	result.ContestHeatmap.Total = ProblemHeatmap{
+		ProblemID:   "total",
+		Submissions: totalHeatmap,
+	}
+
+	// 生成每个题目的热力图数据
+	for problemId := 0; problemId < config.ProblemQuantity; problemId++ {
+		submissions := make([]HeatmapItem, 0)
+
+		for slot := 0; slot < TimeSlotCount; slot++ {
+			timeSlot := slot * timeSlotDuration
+			acceptedCount := 0
+			rejectedCount := 0
+
+			if counts, ok := problemSubmissions[problemId][timeSlot]; ok {
+				acceptedCount = counts[StatusAccepted]
+				rejectedCount = counts[StatusRejected]
+			}
+
+			submissions = append(submissions, HeatmapItem{
+				Timestamp: timeSlot,
+				Status:    StatusAccepted,
+				Count:     acceptedCount,
+			})
+			submissions = append(submissions, HeatmapItem{
+				Timestamp: timeSlot,
+				Status:    StatusRejected,
+				Count:     rejectedCount,
+			})
+		}
+
+		// 按时间戳排序
+		sort.Slice(submissions, func(i, j int) bool {
+			return submissions[i].Timestamp < submissions[j].Timestamp
 		})
+
+		result.ContestHeatmap.Problems[problemId].Submissions = submissions
 	}
 
-	// 构建每个题目的热力图
-	for i := 0; i < config.ProblemQuantity; i++ {
-		for timestamp, count := range problemAcceptedMap[i] {
-			result.ProblemRunHeatmap[i].Accepted = append(result.ProblemRunHeatmap[i].Accepted, &RunHeatmapItem{
-				Timestamp: timestamp,
-				Count:     count,
-			})
-		}
-		for timestamp, count := range problemRejectedMap[i] {
-			result.ProblemRunHeatmap[i].Rejected = append(result.ProblemRunHeatmap[i].Rejected, &RunHeatmapItem{
-				Timestamp: timestamp,
-				Count:     count,
-			})
-		}
-	}
-
+	// 计算通过率
 	if result.RunCount > 0 {
 		result.AcceptedRate = float64(result.AcceptedCount) / float64(result.RunCount)
-	}
-	result.AcceptedTeamCount[0] = result.TeamCount
-	for _, team := range teamAccepted {
-		result.AcceptedTeamCount[0]--
-		result.AcceptedTeamCount[len(team)]++
 	}
 
 	return result, nil
