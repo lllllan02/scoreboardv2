@@ -5,6 +5,7 @@ import { Submission, Participant } from "../types/submission";
 import { ContestConfig } from "../types/contest";
 import { WomanOutlined, StarOutlined } from "@ant-design/icons";
 import { getContrastColor } from "../utils/colorUtils";
+import { formatStatus } from "../utils/stringUtils";
 import SubmissionFilter from "./SubmissionFilter";
 import "../styles/Contest.css";
 
@@ -54,16 +55,10 @@ const SubmissionList: React.FC<SubmissionListProps> = ({
     const hours = Math.floor(timestamp / 3600000);
     const minutes = Math.floor((timestamp % 3600000) / 60000);
     const seconds = Math.floor((timestamp % 60000) / 1000);
-    
-    return `${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
-  };
 
-  // 格式化状态文本
-  const formatStatus = (status: string) => {
-    return status
-      .split('_')
-      .map(word => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase())
-      .join(' ');
+    return `${hours.toString().padStart(2, "0")}:${minutes
+      .toString()
+      .padStart(2, "0")}:${seconds.toString().padStart(2, "0")}`;
   };
 
   const columns: ColumnsType<Submission> = [
@@ -92,11 +87,11 @@ const SubmissionList: React.FC<SubmissionListProps> = ({
 
         return (
           <div className="problem-cell-container">
-            <div 
+            <div
               className="problem-id-tag"
-              style={{ 
+              style={{
                 backgroundColor,
-                color
+                color,
               }}
             >
               {problem_id}
@@ -121,8 +116,12 @@ const SubmissionList: React.FC<SubmissionListProps> = ({
       render: (team: string, record: Submission) => (
         <span>
           {team}
-          {record.girl && <WomanOutlined style={{ marginLeft: 8, color: '#eb2f96' }} />}
-          {record.unofficial && <StarOutlined style={{ marginLeft: 8, color: '#faad14' }} />}
+          {record.girl && (
+            <WomanOutlined style={{ marginLeft: 8, color: "#eb2f96" }} />
+          )}
+          {record.unofficial && (
+            <StarOutlined style={{ marginLeft: 8, color: "#faad14" }} />
+          )}
         </span>
       ),
     },
@@ -185,4 +184,4 @@ const SubmissionList: React.FC<SubmissionListProps> = ({
   );
 };
 
-export default SubmissionList; 
+export default SubmissionList;

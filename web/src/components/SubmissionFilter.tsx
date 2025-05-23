@@ -1,6 +1,7 @@
 import React from "react";
 import { Select, Space } from "antd";
 import "../styles/Contest.css";
+import { formatStatus } from "../utils/stringUtils";
 
 interface SubmissionFilterProps {
   schools: string[];
@@ -31,14 +32,6 @@ const SubmissionFilter: React.FC<SubmissionFilterProps> = ({
 }) => {
   const handleChange = (type: string, value: string | undefined) => {
     onFilterChange({ [type]: value });
-  };
-
-  // 格式化状态文本
-  const formatStatus = (status: string) => {
-    return status
-      .split("_")
-      .map((word) => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase())
-      .join(" ");
   };
 
   return (
