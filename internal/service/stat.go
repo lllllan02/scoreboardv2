@@ -2,6 +2,8 @@ package service
 
 import (
 	"sort"
+
+	"github.com/lllllan02/scoreboardv2/internal/model"
 )
 
 const (
@@ -78,9 +80,11 @@ func GetContestStat(path string, group string, t int) (result *ContestStat, err 
 	if err != nil {
 		return nil, err
 	}
+	teams := make(map[string]model.Team)
 	for _, team := range teamList {
 		if groupFilter(team, group) {
 			result.TeamCount++
+			teams[string(team.TeamId)] = team
 		}
 	}
 
@@ -107,7 +111,13 @@ func GetContestStat(path string, group string, t int) (result *ContestStat, err 
 
 	// 统计提交数据
 	for _, run := range runList {
+		// 检查提交时间是否在比赛时间内
 		if run.Timestamp > t {
+			continue
+		}
+
+		// 检查队伍是否在队伍列表中
+		if _, ok := teams[string(run.TeamId)]; !ok {
 			continue
 		}
 
