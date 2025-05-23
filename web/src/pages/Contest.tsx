@@ -5,7 +5,7 @@ import { getContestRank } from "../api/rankApi";
 import { getContestSubmissions } from "../api/submission";
 import { ContestConfig } from "../types/contest";
 import { Rank } from "../types/rank";
-import { Submission } from "../types/submission";
+import { Submission, Participant } from "../types/submission";
 import { CloseCircleOutlined } from "@ant-design/icons";
 import { Spin } from "antd";
 import InfiniteScroll from "react-infinite-scroll-component";
@@ -167,26 +167,53 @@ const Contest: React.FC = () => {
   const [submissionTotal, setSubmissionTotal] = useState<number>(0);
   const [currentPage, setCurrentPage] = useState<number>(1);
   const [pageSize, setPageSize] = useState<number>(50);
+  const [submissionFilters, setSubmissionFilters] = useState<{
+    school?: string;
+    team?: string;
+    language?: string;
+    status?: string;
+  }>({});
+  const [submissionFilterOptions, setSubmissionFilterOptions] = useState<{
+    schools: string[];
+    participants: Participant[];
+    languages: string[];
+    statuses: string[];
+  }>({
+    schools: [],
+    participants: [],
+    languages: [],
+    statuses: [],
+  });
 
   // 获取提交列表数据
   const fetchSubmissionData = useCallback(
     async (
       selectedGroup?: string,
-      relativeTimeMs?: number,
+      relativeTimeMs?: number | null,
       page: number = 1,
-      size: number = 50
+      size: number = 50,
+      filters: typeof submissionFilters = {}
     ) => {
       try {
         setSubmissionsLoading(true);
         const response = await getContestSubmissions(
           apiPath,
           selectedGroup,
-          relativeTimeMs,
+          relativeTimeMs || undefined,
           page,
-          size
+          size,
+          filters
         );
+
         setSubmissions(response.data.data);
         setSubmissionTotal(response.data.total);
+        // 更新筛选选项
+        setSubmissionFilterOptions({
+          schools: response.data.schools,
+          participants: response.data.participants,
+          languages: response.data.language,
+          statuses: response.data.status,
+        });
       } catch (err) {
         console.error("获取提交列表失败:", err);
         setError("获取提交列表失败");
@@ -207,12 +234,41 @@ const Contest: React.FC = () => {
 
       console.log(`Fetching ${action} data with:`, { group, time, page });
       if (action === "submit") {
-        fetchSubmissionData(group, time, page, pageSize);
+        // 使用当前的筛选条件
+        fetchSubmissionData(group, time, page, pageSize, submissionFilters);
       } else if (action === "rank") {
         fetchRankData(group, time);
       }
     },
-    [fetchRankData, fetchSubmissionData, pageSize]
+    [fetchRankData, fetchSubmissionData, pageSize, submissionFilters]
+  );
+
+  // 处理筛选变化
+  const handleSubmissionFilterChange = useCallback(
+    (filters: typeof submissionFilters) => {
+      const newFilters = { ...submissionFilters, ...filters };
+      // 如果新的筛选值是 undefined，则从筛选条件中移除该字段
+      Object.keys(filters).forEach(key => {
+        if (filters[key as keyof typeof filters] === undefined) {
+          delete newFilters[key as keyof typeof filters];
+        }
+      });
+      setSubmissionFilters(newFilters);
+      fetchSubmissionData(
+        selectedGroup,
+        relativeTimeMs ?? undefined,
+        1,
+        pageSize,
+        newFilters
+      );
+    },
+    [
+      fetchSubmissionData,
+      selectedGroup,
+      relativeTimeMs,
+      pageSize,
+      submissionFilters,
+    ]
   );
 
   // 修改初始化逻辑，添加加载状态控制
@@ -320,19 +376,20 @@ const Contest: React.FC = () => {
       setSelectedAction(values.action);
 
       // 更新 URL 参数
-      updateUrlParams(values.group, values.action, relativeTimeMs ?? undefined);
+      updateUrlParams(values.group, values.action, relativeTimeMs || undefined);
 
-      // 如果是提交列表，重置分页状态
+      // 如果是提交列表，重置分页状态和筛选条件
       if (values.action === "submit") {
         setCurrentPage(1);
-      }
-
-      // 只有 rank 和 submit 需要获取数据
-      if (["rank", "submit"].includes(values.action)) {
-        fetchData(values.group, values.action, relativeTimeMs, 1);
+        // 重置筛选条件
+        setSubmissionFilters({});
+        // 使用空的筛选条件获取数据
+        fetchSubmissionData(values.group, relativeTimeMs ?? undefined, 1, pageSize, {});
+      } else if (values.action === "rank") {
+        fetchRankData(values.group, relativeTimeMs ?? undefined);
       }
     },
-    [fetchData, relativeTimeMs, updateUrlParams]
+    [fetchSubmissionData, fetchRankData, relativeTimeMs, pageSize, updateUrlParams]
   );
 
   // 处理分页变化
@@ -405,6 +462,7 @@ const Contest: React.FC = () => {
         initialAction={selectedAction}
       />
 
+      {/* 根据选择的动作显示不同的内容 */}
       {selectedAction === "submit" ? (
         <SubmissionList
           contestConfig={contestConfig}
@@ -413,7 +471,13 @@ const Contest: React.FC = () => {
           total={submissionTotal}
           currentPage={currentPage}
           pageSize={pageSize}
+          schools={submissionFilterOptions.schools}
+          participants={submissionFilterOptions.participants}
+          languages={submissionFilterOptions.languages}
+          statuses={submissionFilterOptions.statuses}
+          currentFilters={submissionFilters}
           onPageChange={handleSubmissionPageChange}
+          onFilterChange={handleSubmissionFilterChange}
         />
       ) : selectedAction === "stats" ? (
         <StatsPanel 

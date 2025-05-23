@@ -6,6 +6,7 @@ import (
 
 	"github.com/lllllan02/scoreboardv2/internal/model"
 	"github.com/lllllan02/scoreboardv2/pkg/paginate"
+	"github.com/lllllan02/scoreboardv2/pkg/slices"
 )
 
 type ContestRunQuery struct {
@@ -24,6 +25,8 @@ type ContestRun struct {
 	Data         []*Run         `json:"data"`         // 提交记录
 	Schools      []string       `json:"schools"`      // 学校列表
 	Participants []*Participant `json:"participants"` // 参赛队伍
+	Language     []string       `json:"language"`     // 语言列表
+	Status       []string       `json:"status"`       // 状态列表
 }
 
 type Run struct {
@@ -64,17 +67,7 @@ func GetContestRun(path string, query ContestRunQuery) (result *ContestRun, err 
 	for _, team := range teamList {
 		schools[string(team.Organization)] = struct{}{}
 		teams[string(team.TeamId)] = team
-		result.Participants = append(result.Participants, &Participant{
-			TeamId: string(team.TeamId),
-			Team:   string(team.Name),
-		})
 	}
-
-	// 将学校列表转换为切片并排序
-	for school := range schools {
-		result.Schools = append(result.Schools, school)
-	}
-	sort.Strings(result.Schools)
 
 	// 加载提交记录
 	runList, err := loadRun(path)
@@ -82,6 +75,7 @@ func GetContestRun(path string, query ContestRunQuery) (result *ContestRun, err 
 		return nil, err
 	}
 
+	participants := make(map[string]struct{})
 	for _, run := range runList {
 		teamId := string(run.TeamId)
 		team := teams[teamId]
@@ -95,6 +89,17 @@ func GetContestRun(path string, query ContestRunQuery) (result *ContestRun, err 
 		if !groupFilter(team, query.Group) {
 			continue
 		}
+
+		if _, ok := participants[teamId]; !ok {
+			participants[teamId] = struct{}{}
+			result.Participants = append(result.Participants, &Participant{
+				TeamId: teamId,
+				Team:   string(team.Name),
+			})
+		}
+		result.Schools = append(result.Schools, string(team.Organization))
+		result.Language = append(result.Language, run.Language)
+		result.Status = append(result.Status, run.Status)
 
 		// 如果筛选学校不符合，则跳过
 		if !schoolFilter(team, query.School) {
@@ -139,6 +144,15 @@ func GetContestRun(path string, query ContestRunQuery) (result *ContestRun, err 
 	result.Total = len(result.Data)
 	start, end := paginate.Paginate(query.Page, query.PageSize, result.Total)
 	result.Data = result.Data[start:end]
+
+	// 去重
+	result.Language = slices.Unique(slices.RemoveEmpty(result.Language))
+	result.Status = slices.Unique(slices.RemoveEmpty(result.Status))
+	result.Schools = slices.Unique(slices.RemoveEmpty(result.Schools))
+	sort.Strings(result.Schools)
+	sort.Slice(result.Participants, func(i, j int) bool {
+		return result.Participants[i].TeamId < result.Participants[j].Team
+	})
 
 	return result, nil
 }

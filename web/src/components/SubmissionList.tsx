@@ -1,10 +1,11 @@
 import React from "react";
 import { Table } from "antd";
 import type { ColumnsType } from "antd/es/table";
-import { Submission } from "../types/submission";
+import { Submission, Participant } from "../types/submission";
 import { ContestConfig } from "../types/contest";
 import { WomanOutlined, StarOutlined } from "@ant-design/icons";
 import { getContrastColor } from "../utils/colorUtils";
+import SubmissionFilter from "./SubmissionFilter";
 import "../styles/Contest.css";
 
 interface SubmissionListProps {
@@ -14,7 +15,23 @@ interface SubmissionListProps {
   total: number;
   currentPage: number;
   pageSize: number;
+  schools: string[];
+  participants: Participant[];
+  languages: string[];
+  statuses: string[];
+  currentFilters: {
+    school?: string;
+    team?: string;
+    language?: string;
+    status?: string;
+  };
   onPageChange: (page: number, size: number) => void;
+  onFilterChange: (filters: {
+    school?: string;
+    team?: string;
+    language?: string;
+    status?: string;
+  }) => void;
 }
 
 const SubmissionList: React.FC<SubmissionListProps> = ({
@@ -24,7 +41,13 @@ const SubmissionList: React.FC<SubmissionListProps> = ({
   total,
   currentPage,
   pageSize,
+  schools,
+  participants,
+  languages,
+  statuses,
+  currentFilters,
   onPageChange,
+  onFilterChange,
 }) => {
   // 格式化相对时间为可读格式
   const formatRelativeTime = (timestamp: number) => {
@@ -133,6 +156,14 @@ const SubmissionList: React.FC<SubmissionListProps> = ({
 
   return (
     <div className="submission-list">
+      <SubmissionFilter
+        schools={schools}
+        teams={participants}
+        languages={languages}
+        statuses={statuses}
+        currentFilters={currentFilters}
+        onFilterChange={onFilterChange}
+      />
       <Table
         dataSource={submissions}
         columns={columns}

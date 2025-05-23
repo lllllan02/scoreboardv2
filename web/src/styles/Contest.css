@@ -1394,3 +1394,161 @@ body.dragging-active {
   font-size: 14px;
   padding: 0 8px;
 }
+
+/* 提交筛选器样式 */
+.submission-filter {
+  margin: 20px 0;
+  padding: 16px;
+  background: #fff;
+  border-radius: 8px;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+}
+
+.submission-filter .ant-space {
+  width: 100%;
+  justify-content: flex-start;
+}
+
+@media (max-width: 768px) {
+  .submission-filter .ant-select {
+    width: 100% !important;
+  }
+}
+
+/* 状态选择器下拉选项样式 */
+.ant-select-dropdown .ant-select-item-option-content {
+  font-weight: 500;
+}
+
+.ant-select-dropdown .ant-select-item-option-content .status-accepted {
+  color: #52c41a;
+}
+
+.ant-select-dropdown .ant-select-item-option-content .status-wrong_answer {
+  color: #ff4d4f;
+}
+
+.ant-select-dropdown .ant-select-item-option-content .status-time_limit_exceeded {
+  color: #ff7d00;
+}
+
+.ant-select-dropdown .ant-select-item-option-content .status-runtime_error {
+  color: #b71de8;
+}
+
+.ant-select-dropdown .ant-select-item-option-content .status-compilation_error {
+  color: #0958d9;
+}
+
+.ant-select-dropdown .ant-select-item-option-content .status-memory_limit_exceeded {
+  color: #13c2c2;
+}
+
+.ant-select-dropdown .ant-select-item-option-content .status-presentation_error {
+  color: #722ed1;
+}
+
+.ant-select-dropdown .ant-select-item-option-content .status-pending {
+  color: #1677ff;
+}
+
+.ant-select-dropdown .ant-select-item-option-content .status-frozen {
+  color: #666666;
+}
+
+/* 选中状态的样式 */
+.ant-select-dropdown .ant-select-item-option-selected .ant-select-item-option-content {
+  font-weight: 600;
+}
+
+/* 状态文本样式（不带背景色） */
+.status-text-accepted {
+  color: #52c41a;
+  font-weight: 500;
+}
+
+.status-text-wrong_answer {
+  color: #ff4d4f;
+  font-weight: 500;
+}
+
+.status-text-time_limit_exceeded {
+  color: #ff7d00;
+  font-weight: 500;
+}
+
+.status-text-runtime_error {
+  color: #b71de8;
+  font-weight: 500;
+}
+
+.status-text-compilation_error {
+  color: #0958d9;
+  font-weight: 500;
+}
+
+.status-text-memory_limit_exceeded {
+  color: #13c2c2;
+  font-weight: 500;
+}
+
+.status-text-presentation_error {
+  color: #722ed1;
+  font-weight: 500;
+}
+
+.status-text-pending {
+  color: #1677ff;
+  font-weight: 500;
+}
+
+.status-text-frozen {
+  color: #666666;
+  font-weight: 500;
+}
+
+/* 选中和悬停状态保持相同的文字颜色 */
+.ant-select-dropdown .ant-select-item-option-selected .status-text-accepted,
+.ant-select-dropdown .ant-select-item-option-active .status-text-accepted {
+  color: #52c41a;
+}
+
+.ant-select-dropdown .ant-select-item-option-selected .status-text-wrong_answer,
+.ant-select-dropdown .ant-select-item-option-active .status-text-wrong_answer {
+  color: #ff4d4f;
+}
+
+.ant-select-dropdown .ant-select-item-option-selected .status-text-time_limit_exceeded,
+.ant-select-dropdown .ant-select-item-option-active .status-text-time_limit_exceeded {
+  color: #ff7d00;
+}
+
+.ant-select-dropdown .ant-select-item-option-selected .status-text-runtime_error,
+.ant-select-dropdown .ant-select-item-option-active .status-text-runtime_error {
+  color: #b71de8;
+}
+
+.ant-select-dropdown .ant-select-item-option-selected .status-text-compilation_error,
+.ant-select-dropdown .ant-select-item-option-active .status-text-compilation_error {
+  color: #0958d9;
+}
+
+.ant-select-dropdown .ant-select-item-option-selected .status-text-memory_limit_exceeded,
+.ant-select-dropdown .ant-select-item-option-active .status-text-memory_limit_exceeded {
+  color: #13c2c2;
+}
+
+.ant-select-dropdown .ant-select-item-option-selected .status-text-presentation_error,
+.ant-select-dropdown .ant-select-item-option-active .status-text-presentation_error {
+  color: #722ed1;
+}
+
+.ant-select-dropdown .ant-select-item-option-selected .status-text-pending,
+.ant-select-dropdown .ant-select-item-option-active .status-text-pending {
+  color: #1677ff;
+}
+
+.ant-select-dropdown .ant-select-item-option-selected .status-text-frozen,
+.ant-select-dropdown .ant-select-item-option-active .status-text-frozen {
+  color: #666666;
+}

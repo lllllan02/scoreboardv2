@@ -46,5 +46,7 @@ export interface SubmissionResponse {
     data: Submission[];
     schools: string[];
     participants: Participant[];
+    language: string[];
+    status: string[];
   };
 } 
