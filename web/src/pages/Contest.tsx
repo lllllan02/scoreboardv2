@@ -500,7 +500,10 @@ const Contest: React.FC = () => {
           relativeTimeMs={relativeTimeMs}
         />
       ) : selectedAction === "export" ? (
-        <ExportPanel onExport={handleExport} onCopy={handleCopy} />
+        <ExportPanel 
+          group={selectedGroup}
+          relativeTimeMs={relativeTimeMs}
+        />
       ) : (
         <div className="detail-scoreboard">
           <InfiniteScroll
