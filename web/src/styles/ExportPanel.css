@@ -1,0 +1,42 @@
+.export-panel {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 40px 20px;
+  width: 100%;
+}
+
+.export-container {
+  width: 100%;
+  max-width: 600px;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.export-select {
+  font-size: 14px;
+}
+
+.export-select .ant-select-selector {
+  border-radius: 4px !important;
+  height: 40px !important;
+  padding: 4px 11px !important;
+}
+
+.export-select .ant-select-selection-item {
+  line-height: 30px !important;
+}
+
+.export-buttons {
+  display: flex;
+  gap: 12px;
+  justify-content: center;
+}
+
+.export-buttons .ant-btn {
+  height: 36px;
+  padding: 4px 20px;
+  font-size: 14px;
+  border-radius: 4px;
+} 

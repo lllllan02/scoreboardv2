@@ -4,7 +4,7 @@
  */
 
 import React, { useState } from "react";
-import { Radio } from "antd";
+import { Radio, Dropdown } from "antd";
 import type { RadioChangeEvent } from "antd";
 import { ContestConfig } from "../types/contest";
 
@@ -81,6 +81,26 @@ const GroupFilter: React.FC<GroupFilterProps> = ({
     onChange({ group: selectedGroup, action: newAction });
   };
 
+  // 导出菜单项
+  const exportItems = {
+    items: [
+      {
+        key: 'excel',
+        label: 'Excel表格(xlsx)',
+      },
+      {
+        key: 'copy',
+        label: '复制到剪贴板',
+      },
+    ],
+  };
+
+  // 处理导出按钮点击
+  const handleExportClick = () => {
+    setSelectedAction('export');
+    onChange({ group: selectedGroup, action: 'export' });
+  };
+
   return (
     <div className="filter-container">
       {/* 组别选择区域 */}
@@ -117,9 +137,11 @@ const GroupFilter: React.FC<GroupFilterProps> = ({
           <Radio.Button key="scroll" value="scroll">
             滚榜
           </Radio.Button>
-          <Radio.Button key="export" value="export">
-            导出
-          </Radio.Button>
+          <Dropdown menu={exportItems} trigger={['click']} placement="bottomRight">
+            <Radio.Button key="export" value="export" onClick={handleExportClick}>
+              导出
+            </Radio.Button>
+          </Dropdown>
           <Radio.Button key="stats" value="stats">
             统计
           </Radio.Button>

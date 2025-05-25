@@ -7,7 +7,7 @@ import { ContestConfig } from "../types/contest";
 import { Rank } from "../types/rank";
 import { Submission, Participant } from "../types/submission";
 import { CloseCircleOutlined } from "@ant-design/icons";
-import { Spin } from "antd";
+import { Spin, message } from "antd";
 import InfiniteScroll from "react-infinite-scroll-component";
 import "../styles/Contest.css";
 import ContestHeader from "../components/ContestHeader";
@@ -16,6 +16,7 @@ import ScoreboardTable from "../components/ScoreboardTable";
 import GroupFilter from "../components/GroupFilter";
 import SubmissionList from "../components/SubmissionList";
 import StatsPanel from "../components/StatsPanel";
+import ExportPanel from "../components/ExportPanel";
 
 // 每次加载的队伍数量
 const ITEMS_PER_PAGE = 50;
@@ -416,6 +417,19 @@ const Contest: React.FC = () => {
     setHasMore(currentLength + ITEMS_PER_PAGE < rankData.rows.length);
   }, [hasMore, rankData, visibleRows.length]);
 
+  // 处理导出操作
+  const handleExport = (type: string) => {
+    console.log('Export type:', type);
+    // TODO: 实现具体的导出功能
+    message.info(`正在导出 ${type} 格式文件...`);
+  };
+
+  // 处理复制到剪贴板
+  const handleCopy = () => {
+    // TODO: 实现复制到剪贴板功能
+    message.success('已复制到剪贴板');
+  };
+
   if (error) {
     return (
       <div className="detail-error-message">
@@ -485,6 +499,8 @@ const Contest: React.FC = () => {
           selectedGroup={selectedGroup}
           relativeTimeMs={relativeTimeMs}
         />
+      ) : selectedAction === "export" ? (
+        <ExportPanel onExport={handleExport} onCopy={handleCopy} />
       ) : (
         <div className="detail-scoreboard">
           <InfiniteScroll
